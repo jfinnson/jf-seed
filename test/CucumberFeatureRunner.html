@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cucumber Feature Runner</title>
+    <meta charset="utf-8">
+
+    <!--required cucumber libs (all installed with bower) -->
+    <link rel="stylesheet" href="../app/components/karma-cucumber/vendor/cucumber-html.css">
+    <script src="../app/components/jquery/jquery.js"></script>
+    <script src="../app/components/async/lib/async.js"></script>
+    <script src="../app/components/karma-cucumber/vendor/cucumber.js"></script>
+    <script src="../app/components/karma-cucumber/lib/cucumber-js-runner.js"></script>
+    <script src="../app/components/karma-cucumber/lib/cucumber-js-html-reporter.js"></script>
+
+    <!--uitest.js (also installed with bower) -->
+    <script src="../app/components/uitest.js/dist/uitest.js"></script>
+
+    <!--step definitions-->
+    <script src="features/step_definitions/myStepDefinitions.js"></script>
+
+    <script>
+        addFeatures(["features/user_adds_todo.feature", "features/user_completes_todo.feature", "features/user_saves_todo.feature"]);
+        Cucumber.attachReporter(new Cucumber.HtmlReporter());
+        Cucumber.run();
+    </script>
+</head>
