@@ -1,4 +1,3 @@
-"use strict";
 //Shared general purpose directives
 angular.module("app.shared")
 .directive('ngRightClick',["$parse",  function($parse) {
@@ -42,7 +41,7 @@ angular.module("app.shared")
         });
         
       }
-    }
+    };
   }])
 
 ;

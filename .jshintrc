@@ -1,0 +1,18 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "quotmark": "true",
+  "sub": true,
+  "trailing": false,
+  "undef": false,
+  "unused": false,
+  "browser": true,
+  "node": true,
+  "nonstandard": true,
+  "laxbreak": true,
+  "predef": ["angular","$","moment"]
+}

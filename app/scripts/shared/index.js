@@ -1,2 +1,2 @@
 angular.module('app.shared', ['Sowingo.Config',
-                                  'ui.keypress',]);
+                                  'ui.keypress']);

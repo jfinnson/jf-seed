@@ -1,5 +1,3 @@
-"use strict";
-
 /* 
  *  Stripped example service for demo purposes.
  *  

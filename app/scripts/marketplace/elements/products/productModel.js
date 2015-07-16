@@ -1,5 +1,3 @@
-"use strict";
-
 angular.module("app")
 
 .service("productModel", [ function() {
@@ -33,7 +31,7 @@ angular.module("app")
       },
       "type" : "text"
     }
-  }
+  };
 
   this.data = {
     "params" : {
@@ -42,6 +40,6 @@ angular.module("app")
     "getStatus" : function() { //Example function
       return this.last_state;
     }
-  }
+  };
 
 } ]);

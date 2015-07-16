@@ -1,5 +1,3 @@
-"use strict";
-
 /*
  * Front end model of an account.
  * Singleton service used for reference by the element manager and generic controllers/directives.
@@ -23,7 +21,6 @@ angular.module("app.marketplace.elements").service("accountModel",
               "single" : function(options){
                 if(!options || !options.account_id){
                   throw "Missing option(s) for account path 'single'. Options: " + options;
-                  return false;
                 }
                 return "account/" + options.account_id;
               }
@@ -76,13 +73,13 @@ angular.module("app.marketplace.elements").service("accountModel",
                 "submit" : true
               }
             }
-          }
+          };
 
           //Fields and functions replicated for each instance.
           this.data = {
             "params" : {
               "model_name" : "account"
             }
-          }
+          };
 
         } ]);

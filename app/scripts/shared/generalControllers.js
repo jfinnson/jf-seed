@@ -1,5 +1,3 @@
-"use strict";
-
 angular.module("app.shared")
 .controller("AlertCtrl",
     [ "$scope", "alertSrv", function($scope, alertSrv) {
