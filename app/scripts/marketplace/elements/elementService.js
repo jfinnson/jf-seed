@@ -8,7 +8,6 @@ angular
     .service(
         "elementSrv",
         [
-            "apiUtils",
             "onlineUtils",
             "serverAPI",
             "accountModel",
@@ -16,7 +15,7 @@ angular
             "$rootScope",
             "$q",
             "$timeout",
-            function(apiUtils, onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
+            function(onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
 
               // Ele model/class vars and initialization
               var _eleNameMap = { // Name to ele service

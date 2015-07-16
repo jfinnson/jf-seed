@@ -1,13 +1,11 @@
-"use strict";
-
 // ui.directives testing to fix datepicker
-angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
+angular.module("app", ['ngRoute', 'app.shared', 'app.marketplace' ]).config(
     [
         "$routeProvider",
         "$locationProvider",
         function($routeProvider, $locationProvider) {
 
-          $routeProvider.when("/2", {
+          $routeProvider.when("/", {
             templateUrl : "templates/marketplace/main/mainPage.html",
             controller : "SystemController",
             page : "main"
@@ -15,10 +13,10 @@ angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
             templateUrl : "templates/shared/support/about.html",
             controller : "AboutController",
             page : "about"
-          }).when("/", {
+          }).when("/test", {
             templateUrl : "templates/shared/support/testing.html",
             controller : 'TestingController',
-            page : "testing"
+            page : "testing"   
           }).otherwise({
             redirectTo : '/'
           });
@@ -122,6 +120,8 @@ angular.module('app.marketplace.elements', []);
 
 angular.module('app.marketplace', ['app.Config',
                                    'app.marketplace.system',
+                                   'app.marketplace.support',
+                                   'app.marketplace.elements',
                                    'ui.keypress']);
 
 angular.module('app.marketplace.support', []);
@@ -618,7 +618,6 @@ angular
     .service(
         "elementSrv",
         [
-            "apiUtils",
             "onlineUtils",
             "serverAPI",
             "accountModel",
@@ -626,7 +625,7 @@ angular
             "$rootScope",
             "$q",
             "$timeout",
-            function(apiUtils, onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
+            function(onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
 
               // Ele model/class vars and initialization
               var _eleNameMap = { // Name to ele service

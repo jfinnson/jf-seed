@@ -1,13 +1,11 @@
-"use strict";
-
 // ui.directives testing to fix datepicker
-angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
+angular.module("app", ['ngRoute', 'app.shared', 'app.marketplace' ]).config(
     [
         "$routeProvider",
         "$locationProvider",
         function($routeProvider, $locationProvider) {
 
-          $routeProvider.when("/2", {
+          $routeProvider.when("/", {
             templateUrl : "templates/marketplace/main/mainPage.html",
             controller : "SystemController",
             page : "main"
@@ -15,10 +13,10 @@ angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
             templateUrl : "templates/shared/support/about.html",
             controller : "AboutController",
             page : "about"
-          }).when("/", {
+          }).when("/test", {
             templateUrl : "templates/shared/support/testing.html",
             controller : 'TestingController',
-            page : "testing"
+            page : "testing"   
           }).otherwise({
             redirectTo : '/'
           });

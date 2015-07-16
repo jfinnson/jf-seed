@@ -78,8 +78,7 @@ module.exports = function(grunt) {
         files : [ {
           // Marketplace JS Libs
           dest : '<%= dirs.app.root %>/scripts/compiled/libraries.js',
-          src : [ '<%= dirs.jslib.bower %>/jquery/dist/jquery.js', '<%= dirs.jslib.bower %>/angular/angular.js',
-              '<%= dirs.jslib.bower %>/angular-route/angular-route.js', '<%= dirs.jslib.bower %>/angular-ui-grid/ui-grid.js',
+          src : ['<%= dirs.jslib.bower %>/angular-route/angular-route.js', '<%= dirs.jslib.bower %>/angular-ui-grid/ui-grid.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap/ui-bootstrap-tpls.min.js', '<%= dirs.jslib.bower %>/angular-ui-utils/ui-utils.min.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap-show-errors/src/showErrors.min.js', '<%= dirs.jslib.bower %>/underscore/underscore.js',
               '<%= dirs.jslib.root %>/toaster/toaster.js']
@@ -133,48 +132,16 @@ module.exports = function(grunt) {
       }
     },
     html2js : {
-      options : {
-        base : 'app/templates',
-        singleModule : true,
-        // Note: This helps minify because we use double-quotes for
-        // HTML attributes, so every one of those will need to be
-        // escaped (adding an extra char) if we use the default
-        // double-quotes for quoteChar.
-        quoteChar : '\'',
-        htmlmin : {
-          collapseBooleanAttributes : true,
-          collapseWhitespace : true,
-          removeAttributeQuotes : true,
-          removeComments : true,
-          removeEmptyAttributes : true,
-          removeRedundantAttributes : true,
-          removeScriptTypeAttributes : true,
-          removeStyleLinkTypeAttributes : true
-        }
-      },
-      templates : {
-        options : {
-          module : 'Sowingo.Marketplace.Templates'
-        },
-        files : [ {
-          dest : '<%= dirs.staging.marketplace %>/js/templates.js',
-          src : [ 'app/templates/marketplace/**/*.html', 'app/templates/shared/**/*.html', ]
-        } ]
-      }
+      templates: ["app/templates/**/*.html"]
     },
     htmlmin : {
       dist : {
         options : {
-          collapseWhitespace : true,
-          conservativeCollapse : true,
-          collapseBooleanAttributes : true,
-          removeCommentsFromCDATA : true,
-          removeOptionalTags : true
         },
         files : [ {
           expand : true,
           cwd : "app",
-          src : "*.html",
+          src : ["index.html", "404.html"],
           dest : "dist"
         } ]
       }
@@ -254,7 +221,6 @@ module.exports = function(grunt) {
       dist : {
         files : {
           "dist/scripts/libraries.min.js" : [ "dist/scripts/libraries.min.js" ],
-          "dist/scripts/templates.min.js" : [ "dist/scripts/templates.min.js" ],
           "dist/scripts/main.min.js" : [ "dist/scripts/main.min.js" ]
         }
       }
@@ -276,7 +242,7 @@ module.exports = function(grunt) {
       server : {
         files : [ "app/indexTemplate.html", "app/templates/**/*.html", "app/pages/**/*.html", "app/scripts/**/*.js", "app/styles/**/*.less",
             "app/styles/**/*.{png,jpg,jpeg}" ],
-        tasks : [ "less", "html2js:templates", "preprocess:dev", "jshint", "livereload" ]
+        tasks : [ "concat", "less", "html2js:templates", "preprocess:dev", "jshint", "livereload" ]
       }
     }
   });
@@ -315,7 +281,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask("server", function(target) {
-    var tasks = [ "preprocess:dev", "less", "html2js:templates", "jshint", "connect:dev" ];
+    var tasks = [ "preprocess:dist", "less", "html2js:templates", "jshint", "connect:dist" ];
 
     if (target !== "noreload") {
       tasks.push("livereload-start");
@@ -350,9 +316,15 @@ module.exports = function(grunt) {
     grunt.task.run(tasks);
   });
   grunt.registerTask("serve", ["livereload-start", "connect:dev" ]);
+  grunt.registerTask("testtask", ["preprocess:dist", "less", "html2js:templates", "jshint", 
+                                  "ngconstant", "useminPrepare", "imagemin", "cssmin", "htmlmin",
+                                  "concat", "concat:dev_lib", "concat:dev_app", 'ngAnnotate', "copy", "uglify:dist", "usemin" ]);
 
-  grunt.registerTask("build", [ "clean:dist", "preprocess:dev", "less", "html2js:templates", "jshint", "ngconstant", "useminPrepare", "imagemin", "cssmin", "htmlmin",
-      "concat", "concat:dev_lib", "concat:dev_app", 'ngAnnotate', "copy", "uglify:dist", "usemin" ]);
+  grunt.registerTask("build", [ "clean:dist", 
+                                "preprocess:dist", "less", "html2js:templates", "jshint", 
+                                "ngconstant", "useminPrepare", "imagemin", "cssmin", "htmlmin",
+                                "concat", "concat:dev_lib", "concat:dev_app", 'ngAnnotate', "copy", "uglify:dist", "usemin" 
+                                ]);
 
   grunt.registerTask("default", [ "build" ]);
 };
