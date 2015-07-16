@@ -82,7 +82,7 @@ module.exports = function(grunt) {
               '<%= dirs.jslib.bower %>/angular-route/angular-route.js', '<%= dirs.jslib.bower %>/angular-ui-grid/ui-grid.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap/ui-bootstrap-tpls.min.js', '<%= dirs.jslib.bower %>/angular-ui-utils/ui-utils.min.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap-show-errors/src/showErrors.min.js', '<%= dirs.jslib.bower %>/underscore/underscore.js',
-              '<%= dirs.jslib.root %>/toaster/toaster.js', ]
+              '<%= dirs.jslib.root %>/toaster/toaster.js']
         } ]
       },
       //Concat into app/ so that all src and template files can be used without being referenced in index.html
@@ -90,7 +90,7 @@ module.exports = function(grunt) {
         files : [
             {
               dest : '<%= dirs.app.root %>/scripts/compiled/main.js',
-              src : [ 'app/scripts/globals.js', 'app/scripts/config.js', 'app/scripts/{shared,marketplace}/**/index.js',
+              src : [ 'app/scripts/app.js', 'app/scripts/globals.js', 'app/scripts/config.js', 'app/scripts/{shared,marketplace}/**/index.js',
                   'app/scripts/{shared,marketplace}/**/*.js' ]
             }, {
               dest : '<%= dirs.app.root %>/scripts/compiled/templates.js',
@@ -101,21 +101,15 @@ module.exports = function(grunt) {
     connect : {
       dev : {
         options : {
-          port : 8001,
-          hostname : "0.0.0.0",
-          middleware : function(connect, options) {
-            return [ lrSnippet, connect.static(options.base), connect.directory(options.base) ];
-          },
+          port : 8002,
+          base: '<%= dirs.app.root %>',
           keepalive : true
         }
       },
       dist : {
         options : {
-          port : 8001,
-          hostname : "0.0.0.0",
-          middleware : function(connect, options) {
-            return [ connect.static(options.base), connect.directory(options.base) ];
-          },
+          port : 8003,
+          base: '<%= dirs.dist.root %>',
           keepalive : true
         }
       }
@@ -204,7 +198,7 @@ module.exports = function(grunt) {
       options : {
         jshintrc : ".jshintrc"
       },
-      all : [ "app/scripts/**/*.js" ]
+      all : [ "app/scripts/marketplace/**/*.js", "app/scripts/shared/**/*.js","app/scripts/app.js" ]
     },
     karma : {
       options : {
@@ -355,8 +349,9 @@ module.exports = function(grunt) {
 
     grunt.task.run(tasks);
   });
+  grunt.registerTask("serve", ["livereload-start", "connect:dev" ]);
 
-  grunt.registerTask("build", [ "clean:dist", "preprocess:dev", "less", "html2js:templates", "jshint", "useminPrepare", "imagemin", "cssmin", "htmlmin",
+  grunt.registerTask("build", [ "clean:dist", "preprocess:dev", "less", "html2js:templates", "jshint", "ngconstant", "useminPrepare", "imagemin", "cssmin", "htmlmin",
       "concat", "concat:dev_lib", "concat:dev_app", 'ngAnnotate', "copy", "uglify:dist", "usemin" ]);
 
   grunt.registerTask("default", [ "build" ]);

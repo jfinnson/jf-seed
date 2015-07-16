@@ -7,7 +7,7 @@ angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
         "$locationProvider",
         function($routeProvider, $locationProvider) {
 
-          $routeProvider.when("/", {
+          $routeProvider.when("/2", {
             templateUrl : "templates/marketplace/main/mainPage.html",
             controller : "SystemController",
             page : "main"
@@ -15,7 +15,7 @@ angular.module("app", [ 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
             templateUrl : "templates/shared/support/about.html",
             controller : "AboutController",
             page : "about"
-          }).when("/test", {
+          }).when("/", {
             templateUrl : "templates/shared/support/testing.html",
             controller : 'TestingController',
             page : "testing"

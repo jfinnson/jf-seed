@@ -1,3 +1,3 @@
-angular.module('app.marketplace', ['Sowingo.Config',
+angular.module('app.marketplace', ['app.Config',
                                    'app.marketplace.system',
                                    'ui.keypress']);
