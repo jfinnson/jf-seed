@@ -1,5 +1,5 @@
 
-angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
+angular.module("app", ['app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
     [
         "$routeProvider",
         "$locationProvider",
@@ -40,7 +40,8 @@ angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'ap
         "$timeout",
         "$window",
         "$compile",
-        function($route, $rootScope, $location, $timeout, $window, $compile) {
+        "apiUrl",
+        function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
 
           $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
             // Possible place for access control
@@ -95,4 +96,16 @@ angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'ap
             return original.apply($location, [ path ]);
           };
 
+          //Attach useful nested checking object to window.
+          window.checkNested = function(obj /*, level1, level2, ... levelN*/) {
+            var args = Array.prototype.slice.call(arguments, 1);
+
+            for (var i = 0; i < args.length; i++) {
+              if (!obj || !obj.hasOwnProperty(args[i])) {
+                return false;
+              }
+              obj = obj[args[i]];
+            }
+            return true;
+          };
         } ]);

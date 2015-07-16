@@ -36,7 +36,7 @@ module.exports = function(grunt) {
     },
     ngconstant : {
       options : {
-        name : 'app.Config',
+        name : 'app.config',
         dest : 'app/scripts/config.js',
         constants : grunt.file.readJSON('config/constants.json')
       },

@@ -11,6 +11,10 @@ angular.module("app.marketplace.system").controller("SystemController",
       //init services here
       elementSrv.initService();
 //      accountService.init($scope);
+      
+      elementSrv.getEles('product').then(function(products){
+        $scope.products = products;
+      });
 
       $scope.$watch('account.id', function(newValue, oldValue) {
         if (newValue && newValue !== oldValue) {

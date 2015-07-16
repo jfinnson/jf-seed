@@ -15,7 +15,8 @@ angular
             "$rootScope",
             "$q",
             "$timeout",
-            function(onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
+            "apiUrl",
+            function(onlineUtils, serverAPI, accountModel, productModel, $rootScope, $q, $timeout, apiUrl) {
 
               // Ele model/class vars and initialization
               var _eleNameMap = { // Name to ele service
@@ -212,6 +213,8 @@ angular
                 if (path === false) {
                   // Assumed error was thrown by api pathType fn.
                   return false;
+                }else{
+                  path = apiUrl + path;
                 }
 
                 var params = options || {

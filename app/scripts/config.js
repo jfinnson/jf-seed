@@ -1,4 +1,4 @@
-angular.module('app.Config', [])
+angular.module('app.config', [])
 
 .constant('apiUrl', 'http://localhost:5000')
 

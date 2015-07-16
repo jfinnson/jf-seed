@@ -1,5 +1,5 @@
 
-angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
+angular.module("app", ['app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
     [
         "$routeProvider",
         "$locationProvider",
@@ -40,7 +40,8 @@ angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'ap
         "$timeout",
         "$window",
         "$compile",
-        function($route, $rootScope, $location, $timeout, $window, $compile) {
+        "apiUrl",
+        function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
 
           $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
             // Possible place for access control
@@ -95,9 +96,21 @@ angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'ap
             return original.apply($location, [ path ]);
           };
 
+          //Attach useful nested checking object to window.
+          window.checkNested = function(obj /*, level1, level2, ... levelN*/) {
+            var args = Array.prototype.slice.call(arguments, 1);
+
+            for (var i = 0; i < args.length; i++) {
+              if (!obj || !obj.hasOwnProperty(args[i])) {
+                return false;
+              }
+              obj = obj[args[i]];
+            }
+            return true;
+          };
         } ]);
 
-angular.module('app.Config', [])
+angular.module('app.config', [])
 
 .constant('apiUrl', 'http://localhost:5000')
 
@@ -116,9 +129,9 @@ angular.module('app.Config', [])
 .constant('defaultPaginationOptions', {currentPage:1,totalItems:1,maxSize:5,itemsPerPage:20})
 
 ;
-angular.module('app.marketplace.elements', []);
+angular.module('app.marketplace.elements', ['app.config']);
 
-angular.module('app.marketplace', ['app.Config',
+angular.module('app.marketplace', ['app.config',
                                    'app.marketplace.system',
                                    'app.marketplace.support',
                                    'app.marketplace.elements',
@@ -130,7 +143,7 @@ angular.module('app.marketplace.system', []);
 
 angular.module('app.marketplace.ui', []);
 
-angular.module('app.shared', ['app.Config',
+angular.module('app.shared', ['app.config',
                                   'ui.keypress']);
 
 /*
@@ -154,10 +167,10 @@ angular.module("app.marketplace.elements").service("accountModel",
                 return "accounts";
               },
               "single" : function(options){
-                if(!options || !options.account_id){
+                if(!checkNested(options,'data','account_id')){
                   throw "Missing option(s) for account path 'single'. Options: " + options;
                 }
-                return "account/" + options.account_id;
+                return "account/" + options.data.account_id;
               }
             },
 
@@ -625,7 +638,8 @@ angular
             "$rootScope",
             "$q",
             "$timeout",
-            function(onlineUtils, serverAPI, accountModel, productModel, eleTreeManager, $rootScope, $q, $timeout) {
+            "apiUrl",
+            function(onlineUtils, serverAPI, accountModel, productModel, $rootScope, $q, $timeout, apiUrl) {
 
               // Ele model/class vars and initialization
               var _eleNameMap = { // Name to ele service
@@ -822,6 +836,8 @@ angular
                 if (path === false) {
                   // Assumed error was thrown by api pathType fn.
                   return false;
+                }else{
+                  path = apiUrl + path;
                 }
 
                 var params = options || {
@@ -1068,10 +1084,23 @@ angular.module("app")
 
 .service("productModel", [ function() {
   var _this = this;
-  this.modelData = {
-    "name" : "appliance",
-    "display_name" : "Appliance",
+  this.model_data = {
+    "name" : "product",
+    "display_name" : "Product",
     "api" : {
+      //Different path types which correspond to different endpoints.
+      "multiple" : function(options){
+        if(!checkNested(options)){
+          throw "Missing option(s) for account path 'single'. Options: " + options;
+        }
+        return "/products";
+      },
+      "single" : function(options){
+        if(!checkNested(options,'data','product_id')){
+          throw "Missing option(s) for account path 'single'. Options: " + options;
+        }
+        return "/product/" + options.data.product_id;
+      }
 
     }
 
@@ -1149,6 +1178,10 @@ angular.module("app.marketplace.system").controller("SystemController",
       //init services here
       elementSrv.initService();
 //      accountService.init($scope);
+      
+      elementSrv.getEles('product').then(function(products){
+        $scope.products = products;
+      });
 
       $scope.$watch('account.id', function(newValue, oldValue) {
         if (newValue && newValue !== oldValue) {
@@ -1242,7 +1275,7 @@ angular
                *          {isAsync, dataType, checkCache, doCache, dbRef,
                *          eleType, dataContent, POST, noLoadingImg}
                */
-              var doAPICall = function(fromUrl, options) {
+              var _doAPICall = function(fromUrl, options) {
                 // Assert
                 if (!fromUrl) {
                   throw "Empty fromUrl passed";
@@ -1266,6 +1299,10 @@ angular
                     function(data, status, headers, config) {
                       throw ("Error with api call: " + fromUrl + ". Error status: " + status);
                     });
+              };
+              
+              return {
+                doAPICall : _doAPICall
               };
             } ])
 

@@ -15,7 +15,7 @@ angular
                *          {isAsync, dataType, checkCache, doCache, dbRef,
                *          eleType, dataContent, POST, noLoadingImg}
                */
-              var doAPICall = function(fromUrl, options) {
+              var _doAPICall = function(fromUrl, options) {
                 // Assert
                 if (!fromUrl) {
                   throw "Empty fromUrl passed";
@@ -39,6 +39,10 @@ angular
                     function(data, status, headers, config) {
                       throw ("Error with api call: " + fromUrl + ". Error status: " + status);
                     });
+              };
+              
+              return {
+                doAPICall : _doAPICall
               };
             } ])
 

@@ -1,1 +1,1 @@
-angular.module('app.marketplace.elements', []);
+angular.module('app.marketplace.elements', ['app.config']);

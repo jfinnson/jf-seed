@@ -1,2 +1,2 @@
-angular.module('app.shared', ['app.Config',
+angular.module('app.shared', ['app.config',
                                   'ui.keypress']);

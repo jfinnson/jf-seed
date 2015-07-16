@@ -19,10 +19,10 @@ angular.module("app.marketplace.elements").service("accountModel",
                 return "accounts";
               },
               "single" : function(options){
-                if(!options || !options.account_id){
+                if(!checkNested(options,'data','account_id')){
                   throw "Missing option(s) for account path 'single'. Options: " + options;
                 }
-                return "account/" + options.account_id;
+                return "account/" + options.data.account_id;
               }
             },
 
