@@ -91,10 +91,12 @@ module.exports = function(grunt) {
               dest : '<%= dirs.app.root %>/scripts/compiled/main.js',
               src : [ 'app/scripts/app.js', 'app/scripts/globals.js', 'app/scripts/config.js', 'app/scripts/{shared,marketplace}/**/index.js',
                   'app/scripts/{shared,marketplace}/**/*.js' ]
-            }, {
-              dest : '<%= dirs.app.root %>/scripts/compiled/templates.js',
-              src : [ 'app/templates/generated/*.js' ]
-            } ]
+            }
+//            , {
+//              dest : '<%= dirs.app.root %>/scripts/compiled/templates.js',
+//              src : [ 'app/templates/generated/*.js' ]
+//            } 
+            ]
       }
     },
     connect : {
@@ -131,8 +133,38 @@ module.exports = function(grunt) {
         }
       }
     },
-    html2js : {
-      templates: ["app/templates/**/*.html"]
+    html2js: {
+      options: {
+        base: 'app',
+        singleModule: true,
+        // Note: This helps minify because we use double-quotes for
+        // HTML attributes, so every one of those will need to be
+        // escaped (adding an extra char) if we use the default
+        // double-quotes for quoteChar.
+        quoteChar: '\'',
+        htmlmin: {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+          removeEmptyAttributes: true,
+          removeRedundantAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true
+        }
+      },
+      templates: {
+        options: {
+          module: 'app.marketplace.templates'
+        },
+        files: [{
+          dest: 'app/scripts/compiled/templates.js',
+          src: [
+            'app/templates/marketplace/**/*.html',
+            'app/templates/shared/**/*.html',
+          ]
+        }]
+      }
     },
     htmlmin : {
       dist : {
@@ -246,10 +278,7 @@ module.exports = function(grunt) {
       }
     }
   });
-
-  // template compilation
-  var TEMPLATE = "angular.module('%s').run(['$templateCache', function($templateCache) {\n" + "  $templateCache.put('%s',\n    '%s');\n" + "}]);\n";
-
+ 
   var escapeContent = function(content) {
     return content.replace(/'/g, "\\'").replace(/\r?\n/g, "\\n' +\n    '");
   };
@@ -262,24 +291,7 @@ module.exports = function(grunt) {
       cb();
     });
   });
-
-  grunt.registerMultiTask("html2js", "Generate js version of html template.", function() {
-    /* jshint camelcase: false */
-    var files = grunt._watch_changed_files || grunt.file.expand(this.data); //
-
-    files.forEach(function(file) {
-      var content = escapeContent(grunt.file.read(file));
-      var fileName = file.substr(4, file.length);
-      var template = util.format(TEMPLATE, "app", fileName, content);
-
-      var slashIndex = file.lastIndexOf("/");
-
-      //put the file in app/templates/generated and append .js
-      file = "app/templates/generated" + file.substr(slashIndex) + ".js";
-      grunt.file.write(file, template);
-    });
-  });
-
+ 
   grunt.registerTask("server", function(target) {
     var tasks = [ "preprocess:dist", "less", "html2js:templates", "jshint", "connect:dist" ];
 

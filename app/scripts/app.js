@@ -1,5 +1,5 @@
-// ui.directives testing to fix datepicker
-angular.module("app", ['ngRoute', 'app.shared', 'app.marketplace' ]).config(
+
+angular.module("app", ['app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
     [
         "$routeProvider",
         "$locationProvider",
