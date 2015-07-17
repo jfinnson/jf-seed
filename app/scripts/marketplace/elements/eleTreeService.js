@@ -2,19 +2,19 @@
 
 angular.module("app.marketplace.elements")
 
-// Treated like an ele due to its model-like nature. //TODO reassess either
+// Treated like an element due to its model-like nature. //TODO reassess either
 // this manager or all others.
-// Ele/Class/Service for managing the ele display tree
-.service("eleTreeManager", [ "serverAPI", "apiUtils", function(serverAPI, apiUtils) {
+// Element/Class/Service for managing the element display tree
+.service("elementTreeManager", [ "serverAPI", "apiUtils", function(serverAPI, apiUtils) {
   var self = this;
   this.modelData = {
-    "name" : "eleTree",
-    "STORAGE_ID" : "eleTree"
+    "name" : "elementTree",
+    "STORAGE_ID" : "elementTree"
   };
 
-  this.eleTree = {
+  this.elementTree = {
     "params" : {
-      "name" : "eleTree",
+      "name" : "elementTree",
       "server" : false,
       "fields" : {
         "treeMap" : {
@@ -49,23 +49,23 @@ angular.module("app.marketplace.elements")
       // root
       }
     },
-    "createTree" : function(eles) {
-      var currEle = null;
+    "createTree" : function(elements) {
+      var currElement = null;
       var parentKey = null;
       var treeIns = this;
 
       // Stage 1. Create hash maps
-      // Go through eles and categorize them by parent luid
-      for ( var key in eles) {
-        currEle = eles[key];
+      // Go through elements and categorize them by parent luid
+      for ( var key in elements) {
+        currElement = elements[key];
 
         // Get parent hash map key
-        parentKey = currEle.f_data.parentKey || currEle.f_data.parent_luid;
-        if (!parentKey && currEle.f_data.parent_vLuid) {
-          parentKey = ("v" + currEle.f_data.parent_vLuid);
+        parentKey = currElement.f_data.parentKey || currElement.f_data.parent_luid;
+        if (!parentKey && currElement.f_data.parent_vLuid) {
+          parentKey = ("v" + currElement.f_data.parent_vLuid);
         } else if (!parentKey) {
           if (this.f_data.rootType) {
-            if (currEle.f_data.type === this.f_data.rootType) {
+            if (currElement.f_data.type === this.f_data.rootType) {
               parentKey = 0;
             } else {
               parentKey = null;
@@ -81,12 +81,12 @@ angular.module("app.marketplace.elements")
             this.f_data.treeArrayMap[parentKey] = [];
           }
 
-          if (parentKey && eles[parentKey]) {
-            eles[parentKey].f_data.hasChildren = true;
+          if (parentKey && elements[parentKey]) {
+            elements[parentKey].f_data.hasChildren = true;
           }
 
           // Set in hash map
-          this.f_data.treeMap[parentKey][key] = currEle;
+          this.f_data.treeMap[parentKey][key] = currElement;
         }
       }
 
@@ -117,7 +117,7 @@ angular.module("app.marketplace.elements")
         // never take n*n time.
         while (Object.keys(currChildMap).length !== 0 && currChildMapCount < (originalChildMapLength * originalChildMapLength)) {
           currKey = Object.keys(currChildMap)[currChildMapIndex];
-          currEle = this.f_data.treeMap[key][currKey]; // Important
+          currElement = this.f_data.treeMap[key][currKey]; // Important
           // to use
           // "this.f_data.treeMap[key]"
           // to allow
@@ -126,22 +126,22 @@ angular.module("app.marketplace.elements")
           inserted = false;
 
           // Specify key if missing
-          if (!currEle.f_data.key) {
-            currEle.f_data.key = currKey;
+          if (!currElement.f_data.key) {
+            currElement.f_data.key = currKey;
           }
 
           // Case 0. Root array mismatch
-          if ((treeIns.f_data.rootType && currEle.f_data.type !== treeIns.f_data.rootType) && key === "0") {
+          if ((treeIns.f_data.rootType && currElement.f_data.type !== treeIns.f_data.rootType) && key === "0") {
             // Case 0. Mismatch so add to 'misc'
 
-            if (!treeIns.f_data.exceptionType || !currEle.f_data[treeIns.f_data.exceptionType]) {
+            if (!treeIns.f_data.exceptionType || !currElement.f_data[treeIns.f_data.exceptionType]) {
               if (!this.f_data.treeArrayMap['misc']){
                 this.f_data.treeArrayMap['misc'] = [];
               }
-              this.f_data.treeArrayMap['misc'].push(currEle);
+              this.f_data.treeArrayMap['misc'].push(currElement);
             }
             inserted = true;
-          } else if (currEle.f_data.previousKey) { // Insert
+          } else if (currElement.f_data.previousKey) { // Insert
             // according to
             // order.
             // Dictated by
@@ -152,27 +152,27 @@ angular.module("app.marketplace.elements")
             var currChild = null;
             for ( var currChildIndex in currChildArrayMap) {
               currChild = currChildArrayMap[currChildIndex];
-              if (currChild.f_data.key === currEle.f_data.previousKey) {
+              if (currChild.f_data.key === currElement.f_data.previousKey) {
                 // Case 1a. Previous child found
-                currChildArrayMap.splice((parseInt(currChildIndex,10) + 1), 0, currEle);
+                currChildArrayMap.splice((parseInt(currChildIndex,10) + 1), 0, currElement);
                 inserted = true;
                 break;
               }
             }
           } else if (currChildArrayMap.length) {
-            // Case 2. No previous key but eles exist in array
+            // Case 2. No previous key but elements exist in array
             // Insert at start
-            currChildArrayMap.splice(0, 0, currEle);
+            currChildArrayMap.splice(0, 0, currElement);
             inserted = true;
           } else {
-            // Case 3. No previous key and no eles in array.
-            currChildArrayMap.push(currEle);
+            // Case 3. No previous key and no elements in array.
+            currChildArrayMap.push(currElement);
             inserted = true;
 
           }
 
           if (inserted) {
-            // Case 4. Not inserted. Likely due to previous ele not
+            // Case 4. Not inserted. Likely due to previous element not
             // being inserted yet.
             delete currChildMap[currKey];
 
@@ -185,7 +185,7 @@ angular.module("app.marketplace.elements")
           }
         }
 
-        // Case 5 eles with errors or missing parents or missing
+        // Case 5 elements with errors or missing parents or missing
         // previous. Put all into misc array
         if (Object.keys(currChildMap).length) {
           if (!this.f_data.treeArrayMap['misc']) {
@@ -199,41 +199,41 @@ angular.module("app.marketplace.elements")
 
       // Bind to scope for directive use
       // scope.treeArrayMap = this.f_data.treeArrayMap;
-      this.eles = eles; // For internal reference;
+      this.elements = elements; // For internal reference;
     },
     "getTree" : function() {
       return this.f_data.treeArrayMap;
     },
-    "createKey" : function(newEle, eles) {
+    "createKey" : function(newElement, elements) {
       var increment = 0;
-      while (!newEle.f_data.key || (eles[newEle.f_data.key] && eles[newEle.f_data.key] !== newEle)) {
-        newEle.f_data.key = newEle.f_data.luid || ('v' + (newEle.f_data.vLuid + increment));
+      while (!newElement.f_data.key || (elements[newElement.f_data.key] && elements[newElement.f_data.key] !== newElement)) {
+        newElement.f_data.key = newElement.f_data.luid || ('v' + (newElement.f_data.vLuid + increment));
 
-        if (increment > 0 && newEle.f_data.luid) {
+        if (increment > 0 && newElement.f_data.luid) {
 //          debugger;// TODO
         }
         increment++;
 
       }
     },
-    "addEle" : function(newEle, baseEle) {
-      if (!newEle || !newEle.f_data.key){
+    "addEle" : function(newElement, baseElement) {
+      if (!newElement || !newElement.f_data.key){
         return null;
       }
 
       var parentKey = 0;
-      if (baseEle) {
+      if (baseElement) {
         // Set parent vars
-        if (baseEle.f_data.luid) {
-          newEle.f_data.parent_luid = baseEle.f_data.luid;
-          newEle.f_data.parentKey = baseEle.f_data.luid;
+        if (baseElement.f_data.luid) {
+          newElement.f_data.parent_luid = baseElement.f_data.luid;
+          newElement.f_data.parentKey = baseElement.f_data.luid;
         } else {
-          newEle.f_data.parent_vLuid = baseEle.f_data.vLuid;
-          newEle.f_data.parentKey = baseEle.f_data.key || ("v" + newEle.f_data.parent_vLuid);
+          newElement.f_data.parent_vLuid = baseElement.f_data.vLuid;
+          newElement.f_data.parentKey = baseElement.f_data.key || ("v" + newElement.f_data.parent_vLuid);
         }
-        parentKey = newEle.f_data.parentKey;
-        newEle.f_data.parent_ele = baseEle;
-        baseEle.f_data.hasChildren = true;
+        parentKey = newElement.f_data.parentKey;
+        newElement.f_data.parent_element = baseElement;
+        baseElement.f_data.hasChildren = true;
 
       }
       if (!this.f_data.treeMap[parentKey]) {
@@ -242,30 +242,30 @@ angular.module("app.marketplace.elements")
       if (!this.f_data.treeArrayMap[parentKey]) {
         this.f_data.treeArrayMap[parentKey] = [];
       }
-      this.f_data.treeMap[parentKey][newEle.f_data.key] = newEle;
-      this.f_data.treeArrayMap[parentKey].push(newEle);
+      this.f_data.treeMap[parentKey][newElement.f_data.key] = newElement;
+      this.f_data.treeArrayMap[parentKey].push(newElement);
 
       // Set previous vars
       if (this.f_data.treeArrayMap[parentKey].length > 1) {
-        var prevEle = this.f_data.treeArrayMap[parentKey][this.f_data.treeArrayMap[parentKey].length - 2];
-        newEle.f_data.previous_luid = prevEle.f_data.luid;
-        newEle.f_data.previousKey = prevEle.f_data.key;
+        var prevElement = this.f_data.treeArrayMap[parentKey][this.f_data.treeArrayMap[parentKey].length - 2];
+        newElement.f_data.previous_luid = prevElement.f_data.luid;
+        newElement.f_data.previousKey = prevElement.f_data.key;
       }
     },
-    "removeEle" : function(currEle) {
-      if (!currEle){
+    "removeElement" : function(currElement) {
+      if (!currElement){
         return false;
       }
 
-      var parentKey = (currEle.f_data.parentKey || 0);
-      delete this.f_data.treeMap[parentKey][currEle.f_data.key];
+      var parentKey = (currElement.f_data.parentKey || 0);
+      delete this.f_data.treeMap[parentKey][currElement.f_data.key];
 
       var childArray = this.f_data.treeArrayMap[parentKey];
       for ( var index in childArray) {
-        if (childArray[index] === currEle) {
+        if (childArray[index] === currElement) {
           index = parseInt(index,10);
 
-          // Update subsequent ele if there is one.
+          // Update subsequent element if there is one.
           if ((index + 1) < childArray.length) {
             var prevLuid = index > 0 ? childArray[(index - 1)].f_data.luid : null;
             var prevKey = index > 0 ? childArray[(index - 1)].f_data.key : null;
@@ -278,16 +278,16 @@ angular.module("app.marketplace.elements")
       }
 
     },
-    "updateEle" : function(currEleKey, newChildArray, newParent, end, oldChildArray, start) {
-      if (!currEleKey || !(newChildArray || newParent) || end === null || end === undefined || !oldChildArray || start === null || start === undefined) {
-        console.log('error: updateEle', arguments);
+    "updateElement" : function(currElementKey, newChildArray, newParent, end, oldChildArray, start) {
+      if (!currElementKey || !(newChildArray || newParent) || end === null || end === undefined || !oldChildArray || start === null || start === undefined) {
+        console.log('error: updateElement', arguments);
         return false;
       }
 
       //Insure that start is an integer
       start = parseInt(start,10);
-      var currEle = this.eles[currEleKey];
-      var oldParentKey = currEle.f_data.parentKey;
+      var currElement = this.elements[currElementKey];
+      var oldParentKey = currElement.f_data.parentKey;
       var newParentKey = 0;
       if (newParent){
         newParentKey = newParent.f_data.key;
@@ -308,57 +308,57 @@ angular.module("app.marketplace.elements")
         }
         newChildArray = this.f_data.treeArrayMap[parentKey];
 
-        //Open ele
+        //Open element
         newParent.open = true;
       }
 
       //Save new location to hash map
       if (newChildArray !== oldChildArray) {
-        var oldHashMap = this.f_data.treeMap[(currEle.f_data.parentKey || 0)];
+        var oldHashMap = this.f_data.treeMap[(currElement.f_data.parentKey || 0)];
         var newHashMap = this.f_data.treeMap[newParentKey];
 
-        newHashMap[currEleKey] = oldHashMap[currEleKey];
-        delete oldHashMap[currEleKey];
+        newHashMap[currElementKey] = oldHashMap[currElementKey];
+        delete oldHashMap[currElementKey];
 
-        currEle.f_data.parentKey = newParentKey;
-        currEle.f_data.parent_luid = newParentLuid;
+        currElement.f_data.parentKey = newParentKey;
+        currElement.f_data.parent_luid = newParentLuid;
       }
 
-      //Check is to make sure update of prev ele references is necessary
+      //Check is to make sure update of prev element references is necessary
       if (newChildArray !== oldChildArray || start !== end) {
-        //Update prev ele references
+        //Update prev element references
         /*
          * Have to update
-         * 1) currEle
-         * 2) possibly next ele from old list
-         * 3) possibly next ele from new list
+         * 1) currElement
+         * 2) possibly next element from old list
+         * 3) possibly next element from new list
          */
 
-        //Update subsequent ele in new list if there is one.
+        //Update subsequent element in new list if there is one.
         var prevLuid = null;
         var prevKey = null;
         if (end < newChildArray.length) {
-          prevLuid = currEle.f_data.luid;
-          prevKey = currEle.f_data.key;
+          prevLuid = currElement.f_data.luid;
+          prevKey = currElement.f_data.key;
           newChildArray[end].f_data.previous_luid = prevLuid;
           newChildArray[end].f_data.previousKey = prevKey;
         }
-        //Update subsequent ele in old list if there is one.
+        //Update subsequent element in old list if there is one.
         if ((start + 1) < oldChildArray.length) {
           prevLuid = start > 0 ? oldChildArray[(start - 1)].f_data.luid : null;
           prevKey = start > 0 ? oldChildArray[(start - 1)].f_data.key : null;
           oldChildArray[(start + 1)].f_data.previous_luid = prevLuid;
           oldChildArray[(start + 1)].f_data.previousKey = prevKey;
         }
-        //Update currEle
+        //Update currElement
         if (end > 0) {
           prevLuid = newChildArray[(end - 1)].f_data.luid;
           prevKey = newChildArray[(end - 1)].f_data.key;
-          currEle.f_data.previous_luid = prevLuid;
-          currEle.f_data.previousKey = prevKey;
+          currElement.f_data.previous_luid = prevLuid;
+          currElement.f_data.previousKey = prevKey;
         } else {
-          currEle.f_data.previous_luid = null;
-          currEle.f_data.previousKey = null;
+          currElement.f_data.previous_luid = null;
+          currElement.f_data.previousKey = null;
         }
 
       }
@@ -369,7 +369,7 @@ angular.module("app.marketplace.elements")
       }
       newChildArray.splice(end, 0, oldChildArray.splice(start, 1)[0]);
       if (!oldChildArray.length && oldChildArray !== newChildArray && oldParentKey){
-        this.eles[oldParentKey].f_data.hasChildren = false;
+        this.elements[oldParentKey].f_data.hasChildren = false;
       }
     }
 

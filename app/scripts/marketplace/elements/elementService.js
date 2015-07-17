@@ -18,20 +18,20 @@ angular
             "apiUrl",
             function(onlineUtils, serverAPI, accountModel, productModel, $rootScope, $q, $timeout, apiUrl) {
 
-              // Ele model/class vars and initialization
-              var _eleNameMap = { // Name to ele service
-                // "eleTree": eleTreeManager,
+              // Element model/class vars and initialization
+              var _elementNameMap = { // Name to element service
+                // "elementTree": elementTreeManager,
                 "account" : accountModel,
                 "product" : productModel
               };
-              var _eleVCount = {}; // Vid count tracking for all eles
-              var _eleMaps = {};// Instance tracking
-              var _eleTypeList = [];
+              var _elementVCount = {}; // Vid count tracking for all elements
+              var _elementMaps = {};// Instance tracking
+              var _elementTypeList = [];
               var _elements = null;
-              for ( var i in _eleNameMap) {
-                _eleVCount[i] = 1;
-                _eleMaps[i] = {};
-                _eleTypeList.push(i);
+              for ( var i in _elementNameMap) {
+                _elementVCount[i] = 1;
+                _elementMaps[i] = {};
+                _elementTypeList.push(i);
               }
 
               var _compareUpdate = null;
@@ -43,110 +43,110 @@ angular
               /*
                * Get model service for element type
                */
-              var _getModel = function(eleName) {
-                if (!eleName || !_eleNameMap[eleName]) {
+              var _getModel = function(elementName) {
+                if (!elementName || !_elementNameMap[elementName]) {
                   return false;
                 }
-                return _eleNameMap[eleName];
+                return _elementNameMap[elementName];
               };
 
               /*
                * Create new instance of element type
                */
-              var _create = function(eleSrv, options) {
+              var _create = function(elementSrv, options) {
                 if (!options) {
                   options = {};
                 }
 
-                var newEle = $.extend(true, options || {}, eleSrv.data);
-                _setGenMethods(eleSrv, newEle); // Set generic methods for
+                var newElement = $.extend(true, options || {}, elementSrv.data);
+                _setGenMethods(elementSrv, newElement); // Set generic methods for
                 // instance
 
                 // Call autofill fn if model/class has one.
-                if (eleSrv.autofill) {
-                  eleSrv.autofill(newEle);
+                if (elementSrv.autofill) {
+                  elementSrv.autofill(newElement);
                 }
 
-                newEle.vID = _eleVCount[eleSrv.model_data.name]++;
-                var trackID = newEle.id || "v" + newEle.vID;
+                newElement.vID = _elementVCount[elementSrv.model_data.name]++;
+                var trackID = newElement.id || "v" + newElement.vID;
 
                 // Save UI vars
-                var trackUI = _eleMaps[eleSrv.model_data.name][trackID] && _eleMaps[eleSrv.model_data.name][trackID].UI ? _eleMaps[eleSrv.model_data.name][trackID].UI
+                var trackUI = _elementMaps[elementSrv.model_data.name][trackID] && _elementMaps[elementSrv.model_data.name][trackID].UI ? _elementMaps[elementSrv.model_data.name][trackID].UI
                     : {};
-                newEle.UI = trackUI;
+                newElement.UI = trackUI;
 
                 // Update tracking map
-                if(_eleMaps[eleSrv.model_data.name][trackID]){
+                if(_elementMaps[elementSrv.model_data.name][trackID]){
                   //Copy without loosing reference.
-                  angular.copy(newEle, _eleMaps[eleSrv.model_data.name][trackID]);
+                  angular.copy(newElement, _elementMaps[elementSrv.model_data.name][trackID]);
                 }else{
-                  _eleMaps[eleSrv.model_data.name][trackID] = newEle;
+                  _elementMaps[elementSrv.model_data.name][trackID] = newElement;
                 }
 
-                return _eleMaps[eleSrv.model_data.name][trackID];
+                return _elementMaps[elementSrv.model_data.name][trackID];
               };
-              var _createEles = function(eles, eleSrv) {
-                if (eles && eles.length && eleSrv) {
-                  for ( var key in eles) {
-                    eles[key] = _create(eleSrv, eles[key]);
+              var _createElements = function(elements, elementSrv) {
+                if (elements && elements.length && elementSrv) {
+                  for ( var key in elements) {
+                    elements[key] = _create(elementSrv, elements[key]);
                   }
                 }
-                return eles;
+                return elements;
               };
 
               // Sets generic methods for instance that every instance should
               // have.
-              var _setGenMethods = function(eleSrv, eleIns) {
+              var _setGenMethods = function(elementSrv, elementIns) {
 
-                eleIns.get = function(name) {
-                  if (!eleSrv.fields[name]) {
+                elementIns.get = function(name) {
+                  if (!elementSrv.fields[name]) {
                     throw "Field " + name + " does not exist in model.";
                   }
-                  _validateInitField(eleSrv, eleIns, name);
-                  return eleIns[name];
+                  _validateInitField(elementSrv, elementIns, name);
+                  return elementIns[name];
                 };
-                eleIns.set = function(name, value) {
-                  if (!eleSrv.fields[name]) {
+                elementIns.set = function(name, value) {
+                  if (!elementSrv.fields[name]) {
                     throw "Field " + name + " does not exist in model.";
                   }
-                  if (eleSrv.fields[name].type === "object" || eleSrv.fields[name].type === "array") {
+                  if (elementSrv.fields[name].type === "object" || elementSrv.fields[name].type === "array") {
                     if (value) {
-                      // Copies values while maintaining reference links to eleIns[name]
-                      angular.copy(value, eleIns[name]);
+                      // Copies values while maintaining reference links to elementIns[name]
+                      angular.copy(value, elementIns[name]);
                     }
                   } else {
-                    eleIns[name] = value;
+                    elementIns[name] = value;
                   }
                 };
-                eleIns.getFieldParams = function(name) {
-                  if (!eleSrv.fields[name]) {
-                    throw "Field " + name + " does not exist in " + eleSrv.model_data.name + " model.";
+                elementIns.getFieldParams = function(name) {
+                  if (!elementSrv.fields[name]) {
+                    throw "Field " + name + " does not exist in " + elementSrv.model_data.name + " model.";
                   }
-                  return eleSrv.fields[name];
+                  return elementSrv.fields[name];
                 };
               };
               // Helps initialized and check fields
-              var _validateInitField = function(eleSrv, eleIns, name) {
-                var fieldType = eleSrv.fields[name].type;
-                if (!eleIns[name]) {
+              var _validateInitField = function(elementSrv, elementIns, name) {
+                var fieldType = elementSrv.fields[name].type;
+                if (!elementIns[name]) {
                   if (fieldType === "object") {
-                    eleIns[name] = {};
+                    elementIns[name] = {};
                   }
                   if (fieldType === "array") {
-                    eleIns[name] = [];
+                    elementIns[name] = [];
                   }
 
-                  if (eleSrv.fields[name].default_value) {
+                  if (elementSrv.fields[name].default_value) {
                     if (fieldType === "object" || fieldType === "array") {
-                      eleIns[name] = $.extend(true, eleIns[name], eleSrv.fields[name].default_value);
+                      elementIns[name] = $.extend(true, elementIns[name], elementSrv.fields[name].default_value);
                     }
                     // May not want to store date object in the field
                     // else if (fieldType === "date" || fieldType ===
                     // "duration") {
-                    // eleIns[name] = new Date(eleIns[name]);
+                    // elementIns[name] = new Date(elementIns[name]);
                     // }
                     else {
-                      eleIns[name] = eleSrv.fields[name].default_value;
+                      elementIns[name] = elementSrv.fields[name].default_value;
                     }
                   }
                 }
@@ -157,25 +157,25 @@ angular
                * 
                * options.fields used to only update certain fields
                */
-              var _updateBdata = function(eleIns, eleType, options) {
-                if (!eleIns || !eleIns || !eleType) {
+              var _updateBdata = function(elementIns, elementType, options) {
+                if (!elementIns || !elementIns || !elementType) {
                   return false;
                 }
 
-                var eleSrv = _getModel(eleType)[eleType];
+                var elementSrv = _getModel(elementType)[elementType];
 
-                var fields = eleSrv.fields;
+                var fields = elementSrv.fields;
 
-                var currBdata = eleIns.b_data || {};
+                var currBdata = elementIns.b_data || {};
                 var bDataUpdate = {};
                 var currFieldParams = null;
                 // Get all fields that should be submitted to the api (have
                 // api.submit==true)
-                for ( var fieldName in eleIns) {
-                  currFieldParams = eleSrv.fields[fieldName];
+                for ( var fieldName in elementIns) {
+                  currFieldParams = elementSrv.fields[fieldName];
                   if (currFieldParams && currFieldParams.api && currFieldParams.api.submit && (!fields || fields[fieldName])) {
-                    currBdata[fieldName] = eleIns[fieldName];
-                    bDataUpdate[fieldName] = eleIns[fieldName];
+                    currBdata[fieldName] = elementIns[fieldName];
+                    bDataUpdate[fieldName] = elementIns[fieldName];
                   }
                 }
 
@@ -190,15 +190,15 @@ angular
                * 
                * TODO add acceptable list of path types
                */
-              var _get = function(eleType, id, options) {
-                if (!eleType || (!id && !options || !options.pathType || (options.pathType === "single" && !options.id))) {
+              var _get = function(elementType, id, options) {
+                if (!elementType || (!id && !options || !options.pathType || (options.pathType === "single" && !options.id))) {
                   throw "Missing field or option for api get.";
                 }
                 // If single instance is requested, there is no force, and it
                 // exists in memory, then provide the instance in memory.
-                if (id && (!options || !options.forceAPI) && _eleMaps[eleType][id]) {
+                if (id && (!options || !options.forceAPI) && _elementMaps[elementType][id]) {
                   return $q(function(resolve, reject) {
-                    resolve(_eleMaps[eleType][id]);
+                    resolve(_elementMaps[elementType][id]);
                   });
                 } else if (id) {
                   // If id is provided, and force is applied or does not exist
@@ -209,12 +209,12 @@ angular
                   options.pathType = "single";
                 }
 
-                var eleSrv = _getModel(eleType);
-                if (!eleSrv.model_data.api || !eleSrv.model_data.api[options.pathType]) {
-                  throw "Path type, " + options.pathType + ", does not exist for " + eleType;
+                var elementSrv = _getModel(elementType);
+                if (!elementSrv.model_data.api || !elementSrv.model_data.api[options.pathType]) {
+                  throw "Path type, " + options.pathType + ", does not exist for " + elementType;
                 }
 
-                var path = eleSrv.model_data.api[options.pathType](options);
+                var path = elementSrv.model_data.api[options.pathType](options);
                 if (path === false) {
                   // Assumed error was thrown by api pathType fn.
                   return false;
@@ -232,31 +232,31 @@ angular
                     throw "Path " + path + " returned a failure response.";
                   }
 
-                  var eles = response.data ? response.data : response;
-                  if (!eles) {
+                  var elements = response.data ? response.data : response;
+                  if (!elements) {
                     return;
                   }
-                  if (!$.isArray(eles)) {
-                    eles = [ eles ];
+                  if (!$.isArray(elements)) {
+                    elements = [ elements ];
                   }
 
-                  var allEleInsMap = {}; // Map of new _elements
-                  for ( var i in eles) {
-                    var currEleIns = eles[i];
-                    currEleIns.b_data = $.extend(true, {}, eles[i]);
-                    // Create ele while keeping untouched b-data
-                    currEleIns = _create(eleSrv, currEleIns);
-                    allEleInsMap[currEleIns.id] = currEleIns;
+                  var allElementInsMap = {}; // Map of new _elements
+                  for ( var i in elements) {
+                    var currElementIns = elements[i];
+                    currElementIns.b_data = $.extend(true, {}, elements[i]);
+                    // Create element while keeping untouched b-data
+                    currElementIns = _create(elementSrv, currElementIns);
+                    allElementInsMap[currElementIns.id] = currElementIns;
                   }
 
-                  return allEleInsMap;
+                  return allElementInsMap;
                 });
               };
-              var _getEles = function(eleType, options) {
-                if (!eleType || !_getModel(eleType)) {
-                  throw "_getEles: Missing eleType.";
+              var _getElements = function(elementType, options) {
+                if (!elementType || !_getModel(elementType)) {
+                  throw "_getElements: Missing elementType.";
                 }
-                var eleSrv = _getModel(eleType);
+                var elementSrv = _getModel(elementType);
 
                 if (!options) {
                   options = {};
@@ -264,70 +264,70 @@ angular
                 if (!options.pathType) {
                   options.pathType = "multiple";
                 }
-                return _get(eleType, null, options);
+                return _get(elementType, null, options);
               };
               /*
                * General method for posting new/modified _elements to api
                */
-              _submit = function(eleType, options) {
-                if (!eleType || !options || !options.pathType || (options.pathType === "single" && !options.ele)) {
+              _submit = function(elementType, options) {
+                if (!elementType || !options || !options.pathType || (options.pathType === "single" && !options.element)) {
                   throw "_submit: Missing field or option.";
                 }
 
-                var eleSrv = _getModel(eleType);
-                if (!eleSrv.model_data.api || !eleSrv.model_data.api[options.pathType]) {
-                  throw "Path type, " + options.pathType + ", does not exist for " + eleType;
+                var elementSrv = _getModel(elementType);
+                if (!elementSrv.model_data.api || !elementSrv.model_data.api[options.pathType]) {
+                  throw "Path type, " + options.pathType + ", does not exist for " + elementType;
                 }
 
-                var postEles = [];
-                if (!options.eles && options.ele) {
-                  postEles.push(options.ele);
-                } else if (options.eles) {
-                  postEles = options.eles;
+                var postElements = [];
+                if (!options.elements && options.element) {
+                  postElements.push(options.element);
+                } else if (options.elements) {
+                  postElements = options.elements;
                 }
 
                 // Separate fn required to avoid pointer issues.
-                var serverSubmitEle = function(path, currOptions, currEleIns) {
+                var serverSubmitElement = function(path, currOptions, currElementIns) {
                   return serverAPI.doAPICall(path, currOptions).then(function(response) {
                     if (!response || response.success === false || response.success === "failed") {
                       throw "Path " + path + " returned a failure response.";
                     }
 
-                    var newEleData = response.data ? response.data : response;
-                    if (!newEleData) {
+                    var newElementData = response.data ? response.data : response;
+                    if (!newElementData) {
                       return;
                     }
 
-                    var currReEleIns = _updateInstance(currEleIns, newEleData);
+                    var currReElementIns = _updateInstance(currElementIns, newElementData);
 
-                    // update _eleMaps. Should be unnecessary with currReEleIns
-                    _eleMaps[eleType][currReEleIns.id] = currReEleIns;
+                    // update _elementMaps. Should be unnecessary with currReElementIns
+                    _elementMaps[elementType][currReElementIns.id] = currReElementIns;
                   });
                 };
 
-                var reEleIns = [];
+                var reElementIns = [];
                 var allCalls = [];
 
-                var currEleIns = null;
+                var currElementIns = null;
                 var currOptions = null;
-                // Go through ele instances and update if necessary.
-                for ( var i in postEles) {
-                  currEleIns = postEles[i];
+                // Go through element instances and update if necessary.
+                for ( var i in postElements) {
+                  currElementIns = postElements[i];
                   currOptions = {};
                   currOptions.isAsync = true;
 
                   // Get set of fields to pass to api
-                  var bDataUpdate = _updateBdata(currEleIns, eleType, options);
+                  var bDataUpdate = _updateBdata(currElementIns, elementType, options);
                   currOptions = $.extend(currOptions, bDataUpdate);
 
-                  var path = eleSrv.model_data.api[options.pathType](currOptions);
+                  var path = elementSrv.model_data.api[options.pathType](currOptions);
                   if (path === false) {
                     // Assumed error was thrown by api pathType fn.
                     return false;
                   }
 
                   // Would do comparison here to see if update is necessary.
-                  allCalls.push(serverSubmitEle(path, currOptions, currEleIns));
+                  allCalls.push(serverSubmitElement(path, currOptions, currElementIns));
                 }
 
                 if (allCalls && allCalls.length > 0) {
@@ -346,19 +346,19 @@ angular
               // Validate instance's fields against their parameters (correct
               // type etc.)
               // TODO
-              _validateFields = function(eleType, currEle, options) {
+              _validateFields = function(elementType, currElement, options) {
                 if (!options) {
                   options = {};
                 }
-                if (!eleType || !currEle) {
+                if (!elementType || !currElement) {
                   throw "_validateFields: Missing type or instance.";
                 }
-                var eleSrv = _getModel(eleType);
+                var elementSrv = _getModel(elementType);
 
                 var valResult = null;
                 var valResutls = [];
-                for ( var currField in eleSrv.fields) {
-                  // valResult = validateSrv.validateField(currEle[currField],
+                for ( var currField in elementSrv.fields) {
+                  // valResult = validateSrv.validateField(currElement[currField],
                   // fieldParams[currField]); TODO
                   valResult = {
                     "pass" : true
@@ -379,37 +379,37 @@ angular
               };
               
               //Update element object without loosing fields or references.
-              _updateInstance = function(ele, newData) {
-                ele.b_data = $.extend(true, ele.b_data || {}, newData);
-                ele = $.extend(true, ele || {}, newData);
-                return ele;
+              _updateInstance = function(element, newData) {
+                element.b_data = $.extend(true, element.b_data || {}, newData);
+                element = $.extend(true, element || {}, newData);
+                return element;
               };
               
               // Remove instance from global map. Also remove from backend if
               // apiRemove==true
-              var _remove = function(eleType, currEle, apiRemove) {
-                var eleSrv = _getModel(eleType);
-                if (!eleType || !currEle || !eleSrv) {
+              var _remove = function(elementType, currElement, apiRemove) {
+                var elementSrv = _getModel(elementType);
+                if (!elementType || !currElement || !elementSrv) {
                   throw "_remove: Missing type, model, or instance.";
                 }
-                if (apiRemove && (!eleSrv.model_data.api || !eleSrv.model_data.api.remove)) {
+                if (apiRemove && (!elementSrv.model_data.api || !elementSrv.model_data.api.remove)) {
                   throw "_remove: Missing remove api path type.";
                 }
 
-                if (apiRemove && currEle.id) {
-                  var path = eleSrv.model_data.api.remove(currEle);
+                if (apiRemove && currElement.id) {
+                  var path = elementSrv.model_data.api.remove(currElement);
                   if (path === false) {
                     // Assumed error was thrown by api pathType fn.
                     return false;
                   }
-                  return serverAPI.doAPICall(path, currEle).then(function(response) {
+                  return serverAPI.doAPICall(path, currElement).then(function(response) {
                     if (!response || response.success === false || response.success === "failed") {
                       throw "Path " + path + " returned a failure response.";
                     }
-                    delete _eleMaps[eleType][currEle.id];
+                    delete _elementMaps[elementType][currElement.id];
                   });
                 } else {
-                  delete _eleMaps[eleType][currEle.id];
+                  delete _elementMaps[elementType][currElement.id];
                 }
 
                 return true;
@@ -417,9 +417,9 @@ angular
 
               // ---------------------------------------
 
-              // Init universal methods for ele models
+              // Init universal methods for element models
               var _initModelMethods = function() {
-                for ( var i in _eleNameMap) {
+                for ( var i in _elementNameMap) {
                   // TODO would put generic fns or params here. (like local
                   // store methods)
                 }
@@ -440,7 +440,7 @@ angular
                * Public methods
                */
               return {
-                initService : _initService, //Inits service and ele models
+                initService : _initService, //Inits service and element models
 
                 create : _create,
                 remove : _remove,
@@ -451,13 +451,13 @@ angular
                 validateFields : _validateFields,
 
                 get : _get, //Element(s) Retrieval method 
-                getEles : _getEles, //Get all elements of a type. (Convience funciton)
+                getElements : _getElements, //Get all elements of a type. (Convience funciton)
                 submit : _submit, //Element(s) update method
 
-                eleNameMap : _eleNameMap,
-                eleTypeList : _eleTypeList,
-                eleMaps : _eleMaps,
-                eles : _elements
+                elementNameMap : _elementNameMap,
+                elementTypeList : _elementTypeList,
+                elementMaps : _elementMaps,
+                elements : _elements
 
               };
 

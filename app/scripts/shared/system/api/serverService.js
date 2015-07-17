@@ -6,7 +6,7 @@ angular.module("app.shared.system.api").service("serverAPI", [ "$http", function
    * 
    * @param options =
    *          {isAsync, dataType, checkCache, doCache, dbRef,
-   *          eleType, dataContent, POST, noLoadingImg}
+   *          elementType, dataContent, POST, noLoadingImg}
    */
   var _doAPICall = function(fromUrl, options) {
     // Assert

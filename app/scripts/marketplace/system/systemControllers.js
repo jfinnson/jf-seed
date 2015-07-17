@@ -12,7 +12,7 @@ angular.module("app.marketplace.system").controller("SystemController",
 //      accountService.init($scope);
       
       //For demo TODO remove
-      elementSrv.getEles('product').then(function(products){
+      elementSrv.getElements('product').then(function(products){
         $scope.products = products;
       });
 
