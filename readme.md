@@ -1,3 +1,7 @@
+#jf-seed!
+
+- Seed for enterprise angular projects
+
 # About
 
 - watches code for any changes and reloads the page
