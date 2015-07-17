@@ -1,114 +1,96 @@
+angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config([ "$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
 
-angular.module("app", ['app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config(
-    [
-        "$routeProvider",
-        "$locationProvider",
-        function($routeProvider, $locationProvider) {
+  $routeProvider.when("/", {
+    templateUrl : "templates/marketplace/main/mainPage.html",
+    controller : "SystemController",
+    page : "main"
+  }).when("/about", {
+    templateUrl : "templates/shared/support/about.html",
+    controller : "AboutController",
+    page : "about"
+  }).when("/test", {
+    templateUrl : "templates/shared/support/testing.html",
+    controller : 'TestingController',
+    page : "testing"
+  }).otherwise({
+    redirectTo : '/'
+  });
 
-          $routeProvider.when("/", {
-            templateUrl : "templates/marketplace/main/mainPage.html",
-            controller : "SystemController",
-            page : "main"
-          }).when("/about", {
-            templateUrl : "templates/shared/support/about.html",
-            controller : "AboutController",
-            page : "about"
-          }).when("/test", {
-            templateUrl : "templates/shared/support/testing.html",
-            controller : 'TestingController',  
-            page : "testing"   
-          }).otherwise({
-            redirectTo : '/'
-          });
+  // prevent reloading the same page
+  $(document).bind("pagebeforechange", function(e, data) {
+    var to = data.toPage, from = data.options.fromPage;
 
-          // prevent reloading the same page
-          $(document).bind(
-              "pagebeforechange",
-              function(e, data) {
-                var to = data.toPage, from = data.options.fromPage;
+    if (to && to.attr && from && from.attr && to.attr("id") === from.attr("id")) {
+      e.preventDefault();
+    }
+  });
 
-                if (to && to.attr && from && from.attr && to.attr("id") === from.attr("id")) {
-                  e.preventDefault();
-                }
-              });
+} ]).run([ '$route', "$rootScope", "$location", "$timeout", "$window", "$compile", "apiUrl", function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
 
-        } ]).run(
-    [
-        '$route',
-        "$rootScope",
-        "$location",
-        "$timeout",
-        "$window",
-        "$compile",
-        "apiUrl",
-        function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
+  $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
+    // Possible place for access control
 
-          $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
-            // Possible place for access control
+    // Only apply access restrictions if the next has an access role
+    // if (next.access && next.access !== 1 && !(next.access &
+    // $rootScope.account.f_data.role)) {
+    // if ($rootScope.account.f_data.role ===
+    // routingConfig.userRoles.account || $rootScope.account.role ===
+    // routingConfig.userRoles.admin) {
+    // $location.path('/');
+    // }
+    // else {
+    // $location.path('/');
+    // }
+    // }
+    //
+    // if (angular.isDefined($route.current)) {
+    // if (angular.isDefined($route.current.page)) {
+    // $rootScope.currPage = $route.current.page;
+    // } else {
+    //
+    // }
+    // }
+  });
 
-            // Only apply access restrictions if the next has an access role
-            // if (next.access && next.access !== 1 && !(next.access &
-            // $rootScope.account.f_data.role)) {
-            // if ($rootScope.account.f_data.role ===
-            // routingConfig.userRoles.account || $rootScope.account.role ===
-            // routingConfig.userRoles.admin) {
-            // $location.path('/');
-            // }
-            // else {
-            // $location.path('/');
-            // }
-            // }
-            //
-            // if (angular.isDefined($route.current)) {
-            // if (angular.isDefined($route.current.page)) {
-            // $rootScope.currPage = $route.current.page;
-            // } else {
-            //
-            // }
-            // }
-          });
+  // window.onbeforeunload = function(e) {
+  // return 'Navigate away?';
+  // }
 
-          // window.onbeforeunload = function(e) {
-          // return 'Navigate away?';
-          // }
+  // Stop refresh on path change
+  var original = $location.path;
+  $location.path = function(path, reload) {
+    var lastRoute = $route.current;
+    var un = $rootScope.$on('$locationChangeSuccess', function(event) {
+      // These conditions and setting of currentRoute allows a watcher in the
+      // dashboard controller to update the UI on back/forward without reload.
+      // Without the lastRoute check avoid immediately reverting to
+      // lastRoute.
+      if ($route.current && $route.current.params && lastRoute !== $route.current) {
+        $rootScope.currentRoute = $route.current.params;
+      }
 
-          // Stop refresh on path change
-          var original = $location.path;
-          $location.path = function(path, reload) {
-            var lastRoute = $route.current;
-            var un = $rootScope.$on('$locationChangeSuccess', function(event) {
-              // These conditions and setting of currentRoute allows a watcher
-              // in the dashboard controller to update the UI on back/forward
-              // without reload.
-              // Without the lastRoute check avoid immediately reverting to
-              // lastRoute.
-              if ($route.current && $route.current.params && lastRoute !== $route.current) {
-                $rootScope.currentRoute = $route.current.params;
-              }
+      if (lastRoute && lastRoute.$$route.originalPath !== "") {
+        $route.current = lastRoute; // Check is necessary to not backtrack the
+        // first load when path is blank.
+      }
+      un();
+    });
+    return original.apply($location, [ path ]);
+  };
 
-              if (lastRoute && lastRoute.$$route.originalPath !== ""){
-                $route.current = lastRoute; // Check is necessary to not
-                                            // backtrack the first load when
-                                            // path is blank.
-              }
-              un();
-            });
-            return original.apply($location, [ path ]);
-          };
+  // Attach useful nested checking object to window.
+  window.checkNested = function(obj /* , level1, level2, ... levelN */) {
+    var args = Array.prototype.slice.call(arguments, 1);
 
-          //Attach useful nested checking object to window.
-          window.checkNested = function(obj /*, level1, level2, ... levelN*/) {
-            var args = Array.prototype.slice.call(arguments, 1);
-
-            for (var i = 0; i < args.length; i++) {
-              if (!obj || !obj.hasOwnProperty(args[i])) {
-                return false;
-              }
-              obj = obj[args[i]];
-            }
-            return true;
-          };
-        } ]);
+    for (var i = 0; i < args.length; i++) {
+      if (!obj || !obj.hasOwnProperty(args[i])) {
+        return false;
+      }
+      obj = obj[args[i]];
+    }
+    return true;
+  };
+} ]);
 
 angular.module('app.config', [])
 
@@ -143,8 +125,15 @@ angular.module('app.marketplace.system', []);
 
 angular.module('app.marketplace.ui', []);
 
-angular.module('app.shared', ['app.config',
-                                  'ui.keypress']);
+angular.module('app.shared', ['app.config', 'ui.keypress', 'app.shared.ui', 'app.shared.system', 'app.shared.support']);
+
+angular.module('app.shared.support', []);
+
+angular.module('app.shared.system.api', []);
+
+angular.module('app.shared.system', ['app.shared.system.api']);
+
+angular.module('app.shared.ui', []);
 
 /*
  * Front end model of an account.
@@ -1166,7 +1155,6 @@ angular.module('d3', [])
  *  Controls and manages top level task app
  * 
  */
-
 angular.module("app.marketplace.system").controller("SystemController",
     [ "$scope", "$location","elementSrv", function($scope, $location, elementSrv) {
 
@@ -1176,6 +1164,7 @@ angular.module("app.marketplace.system").controller("SystemController",
       elementSrv.initService();
 //      accountService.init($scope);
       
+      //For demo TODO remove
       elementSrv.getEles('product').then(function(products){
         $scope.products = products;
       });
@@ -1190,7 +1179,8 @@ angular.module("app.marketplace.system").controller("SystemController",
 angular.module("app.marketplace.system").service("systemService", [ function() {
 
 } ]);
-angular.module("app.shared")
+//TODO create alertDirective ?
+angular.module("app.shared.support")
 .controller("AlertCtrl",
     [ "$scope", "alertSrv", function($scope, alertSrv) {
       $scope.alertSrv = alertSrv;
@@ -1199,291 +1189,8 @@ angular.module("app.shared")
         $scope.alert = null;
       };
 
-    } ])
-
-.controller("TestingController", [ "$scope", function($scope) {
-} ])
-
-.controller("AboutController", [ "$scope", function($scope) {
-} ]);
-
-//Shared general purpose directives
-angular.module("app.shared")
-.directive('ngRightClick',["$parse",  function($parse) {
-    return function(scope, element, attrs) {
-        var fn = $parse(attrs.ngRightClick);
-        element.bind('contextmenu', function(event) {
-            scope.$apply(function() {
-                event.preventDefault();
-                fn(scope, {$event:event});
-            });
-        });
-    };
-}])
-
-//Improved clickAnywhereButHere directive
-.directive('jfBlur',["$document", function($document){
-    return {
-      restrict: 'A',
-      link: function(scope, elem, attr, ctrl) {
-        elem.bind('click', function(e) {
-          // this part keeps it from firing the click on the document.
-          e.stopPropagation();
-        });
-         
-        scope.$watch(attr.jfBlur, function(newVal, oldVal){
-          if(newVal!==oldVal){
-            if(newVal){
-              var init = true;
-              $document.bind('click', function(event) {
-                if(!init){ 
-                  // magic here.
-                  scope[attr.jfBlur] = false;
-                  $( this ).unbind( event );
-                  scope.$apply();
-                }
-                init = false;
-                });
-            }else{
-            }
-          }
-        });
-        
-      }
-    };
-  }])
-
-;
-
-// local storage version
-angular
-    .module("app.shared")
-    // Web server api service. Single point for api calls.
-    .service(
-        "serverAPI",
-        [
-            "$http",
-            function($http) {
-
-              /**
-               * Single point for http calls
-               * 
-               * @param options =
-               *          {isAsync, dataType, checkCache, doCache, dbRef,
-               *          eleType, dataContent, POST, noLoadingImg}
-               */
-              var _doAPICall = function(fromUrl, options) {
-                // Assert
-                if (!fromUrl) {
-                  throw "Empty fromUrl passed";
-                }
-
-                // If null then create empty object
-                if (!options) {
-                  options = {};
-                }
-
-                // Returns a promise
-                // (http://docs.angularjs.org/api/ng.$q)
-                return $http({
-                  url : fromUrl,
-                  async : options.isAsync || false,
-                  dataType : options.dataType,
-                  data : options.dataContent,
-                  method : options.method || "GET"
-                }).success(function(data, status, headers, config) {
-                }).error(
-                    function(data, status, headers, config) {
-                      throw ("Error with api call: " + fromUrl + ". Error status: " + status);
-                    });
-              };
-              
-              return {
-                doAPICall : _doAPICall
-              };
-            } ])
-
-    // Web socket service
-    .service(
-        "socketSrv",
-        [
-            "$rootScope",
-            function($rootScope) {
-              var connection = null;
-              var attempts = 1;
-              var msgCount = 0;
-              var callbacks = {};
-              var address = null;
-              var scope = $rootScope;
-
-              var _init = function(newAddress, newScope) {
-                address = newAddress;
-                if (newScope){
-                  scope = newScope;
-                }
-                _createWebSocket();
-              };
-
-              var _createWebSocket = function() {
-                if (!address){
-                  return false;
-                }
-                connection = new WebSocket(address);
-
-                connection.onopen = function() {
-                  scope.$emit("websocket-status", {
-                    "status" : "open",
-                    "message" : "Websocket Open"
-                  });
-                  console.log("Opened websocket");
-                  attempts = 1;
-
-                  this
-                      .send('{ "type": "login", "account_type": "client", "token" : "' + $rootScope.account.token + '"}');
-
-                };
-
-                connection.onclose = function() {
-                  scope.$emit("websocket-status", {
-                    "status" : "error",
-                    "message" : "Websocket closed"
-                  }); // close
-                  var time = _generateInterval(attempts);
-                  setTimeout(function() {
-                    attempts++;
-                    _createWebSocket();
-                  }, time);
-                };
-
-                connection.onerror = function(error) {
-                  scope.$emit("websocket-status", {
-                    "status" : "error",
-                    "message" : "Websocket error"
-                  });
-                  console.log("Websocket error: " + error);
-                };
-
-                connection.onmessage = function(e) {
-                  console.log("Websocket message: ", e.data);
-                  var message = JSON.parse(e.data);
-                  if ($.isPlainObject(message) && message.body) {
-                    message.body.datetime = (new Date()).toString();
-                    message.body.id = msgCount++;
-                  }
-                  _dispatchMessage(message);
-                };
-              };
-
-              var _sendMessage = function(message, callback, timeout) {
-                if ("tag" in message) {
-                  if (message.tag in this.callbacks) {
-                    console.log("Problem! Tag already exists in callbacks");
-                  }
-                  this.callbacks[message.tag] = {
-                    timeout : timeout || 60,
-                    callback : callback
-                  };
-                }
-                connection.send(JSON.stringify(message));
-              };
-
-              var _dispatchMessage = function(message) {
-                switch (message.type) {
-                case "command_response":
-                  if (message.command_tag in callbacks) {
-                    callbacks[message.command_tag].callback(message);
-                  } else {
-                    console.log("No callback for tag <" + message.tag + "> in the callback queue");
-                  }
-                  break;
-                case "command":
-                  break;
-                case "status_update":
-                  scope.$emit("websocket-status_update", message.body);
-                  break;
-                default:
-                  console.log("Unknown message from websocket");
-                }
-              };
-
-              var _removeTag = function(tag) {
-                delete this.callbacks[tag];
-              };
-
-              var _generateInterval = function(k) {
-                var maxInterval = (Math.pow(2, k) - 1) * 1000;
-
-                if (maxInterval > 30 * 1000) {
-                  maxInterval = 30 * 1000; // If the generated interval is more
-                  // than 30 seconds, truncate it down to
-                  // 30 seconds.
-                }
-                // generate the interval to a random number between 0 and the
-                // maxInterval determined from above
-                return Math.random() * maxInterval;
-              };
-
-              return {
-                init : _init,
-                createWebSocket : _createWebSocket,
-                sendMessage : _sendMessage,
-                generateInterval : _generateInterval,
-                dispatchMessage : _dispatchMessage,
-                removeTag : _removeTag
-
-              };
-
-            } ])
-
-    // TODO reassess. Provides service for accessing global variables.
-    .service("globalVariablesSrv", [ "$timeout", function($timeout) {
-      var globalVariables = {
-        "currTimeVal" : new Date().getTime(),
-        "currTimeValUTC" : moment().utc().valueOf()
-
-      };
-
-      $timeout(function() {
-        globalVariables["currTimeVal"] = new Date().getTime();
-        globalVariables["currTimeValUTC"] = moment().utc().valueOf();
-      }, 1000);
-
-      return {
-        getVar : function(name) {
-          return globalVariables[name];
-        }
-
-      };
-
-    } ])
-
-    // Service that provides functions for checking the online status of the app
-    .service("onlineUtils",
-        [ "$window", "$rootScope", function($window, $rootScope) {
-
-          $rootScope.online = navigator.onLine;
-          $window.addEventListener("offline", function() {
-            $rootScope.$apply(function() {
-              $rootScope.online = false;
-            });
-          }, false);
-          $window.addEventListener("online", function() {
-            $rootScope.$apply(function() {
-              $rootScope.online = true;
-            });
-          }, false);
-
-          return {
-            isOnline : function() {
-              if ($rootScope.db.active) {
-                return $rootScope.online;
-              } else {
-                return false;
-              }
-            }
-          };
-        } ])
-
+    } ]);
+angular.module("app.shared.support")
     // Alert service for displaying bootstrap alerts
     .service("alertSrv", [ "$timeout", function($timeout) {
 
@@ -1536,96 +1243,357 @@ angular
         closeAlert : _closeAlert
       };
 
-    } ])
+    } ]);
+//Shared general purpose directives
+angular.module("app.shared")
+.directive('ngRightClick',["$parse",  function($parse) {
+    return function(scope, element, attrs) {
+        var fn = $parse(attrs.ngRightClick);
+        element.bind('contextmenu', function(event) {
+            scope.$apply(function() {
+                event.preventDefault();
+                fn(scope, {$event:event});
+            });
+        });
+    };
+}])
 
-    // Other general services
-    .service(
-        "generalUtils",
-        [ function() {
-          var fixDate = function(d, check) { // force d to be on check's YMD,
-            // for daylight savings purposes
-            if (+d) { // prevent infinite looping on invalid dates
-              while (d.getDate() !== check.getDate()) {
-                d.setTime(+d + (d < check ? 1 : -1) * 3600000);
-              }
+//Improved clickAnywhereButHere directive
+.directive('jfBlur',["$document", function($document){
+    return {
+      restrict: 'A',
+      link: function(scope, elem, attr, ctrl) {
+        elem.bind('click', function(e) {
+          // this part keeps it from firing the click on the document.
+          e.stopPropagation();
+        });
+         
+        scope.$watch(attr.jfBlur, function(newVal, oldVal){
+          if(newVal!==oldVal){
+            if(newVal){
+              var init = true;
+              $document.bind('click', function(event) {
+                if(!init){ 
+                  // magic here.
+                  scope[attr.jfBlur] = false;
+                  $( this ).unbind( event );
+                  scope.$apply();
+                }
+                init = false;
+                });
+            }else{
             }
-          };
-          return {
-            parseISO8601 : function(s, ignoreTimezone) { // ignoreTimezone
-              // defaults to false
-              // derived from http://delete.me.uk/2005/03/iso8601.html
-              // TODO: for a know glitch/feature, read
-              // tests/issue_206_parseDate_dst.html
-              var m = s
-                  .match(/^([0-9]{4})(-([0-9]{2})(-([0-9]{2})([T ]([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2})(:?([0-9]{2}))?))?)?)?)?$/);
-              if (!m) {
-                return null;
-              }
-              var date = new Date(m[1], 0, 1);
-              if (ignoreTimezone || !m[13]) {
-                var check = new Date(m[1], 0, 1, 9, 0);
-                if (m[3]) {
-                  date.setMonth(m[3] - 1);
-                  check.setMonth(m[3] - 1);
-                }
-                if (m[5]) {
-                  date.setDate(m[5]);
-                  check.setDate(m[5]);
-                }
-                fixDate(date, check);
-                if (m[7]) {
-                  date.setHours(m[7]);
-                }
-                if (m[8]) {
-                  date.setMinutes(m[8]);
-                }
-                if (m[10]) {
-                  date.setSeconds(m[10]);
-                }
-                if (m[12]) {
-                  date.setMilliseconds(Number("0." + m[12]) * 1000);
-                }
-                fixDate(date, check);
-              } else {
-                date.setUTCFullYear(m[1], m[3] ? m[3] - 1 : 0, m[5] || 1);
-                date.setUTCHours(m[7] || 0, m[8] || 0, m[10] || 0,
-                    m[12] ? Number("0." + m[12]) * 1000 : 0);
-                if (m[14]) {
-                  var offset = Number(m[16]) * 60 + (m[18] ? Number(m[18]) : 0);
-                  offset *= m[15] === '-' ? 1 : -1;
-                  date = new Date(+date + (offset * 60 * 1000));
-                }
-              }
-              return date;
-            },
-            one_day : (24 * 60 * 60 * 1000),
-            one_hour : (60 * 60 * 1000)
-          };
-        } ])
+          }
+        });
+        
+      }
+    };
+  }])
 
-    .service(
-        "localStorageService",
-        [
-            "onlineUtils",
-            "$rootScope",
-            function(onlineUtils, $rootScope) {
-              var appID = "WP-"; // String to go before every storage id.
+;
 
-              var getStorageID = function(STORAGE_ID, ignoreAccount) {
-                var combinedID = appID + STORAGE_ID;
-                if (!ignoreAccount && $rootScope && $rootScope.account && $rootScope.account.name) {
-                  combinedID = $rootScope.account.name + "_" + combinedID;
-                }
-                return combinedID;
-              };
+// Web server api service. Single point for api calls.
+angular.module("app.shared.system.api").service("serverAPI", [ "$http", function($http) {
 
-              this.getItem = function(STORAGE_ID, ignoreAccount) {
-                return localStorage.getItem(getStorageID(STORAGE_ID,
-                    ignoreAccount));
-              };
-              this.setItem = function(STORAGE_ID, data, ignoreAccount) {
-                return localStorage.setItem(getStorageID(STORAGE_ID,
-                    ignoreAccount), JSON.stringify(data));
-              };
+  /**
+   * Single point for http calls
+   * 
+   * @param options =
+   *          {isAsync, dataType, checkCache, doCache, dbRef,
+   *          eleType, dataContent, POST, noLoadingImg}
+   */
+  var _doAPICall = function(fromUrl, options) {
+    // Assert
+    if (!fromUrl) {
+      throw "Empty fromUrl passed";
+    }
 
-            } ]);
+    // If null then create empty object
+    if (!options) {
+      options = {};
+    }
+
+    // Returns a promise
+    // (http://docs.angularjs.org/api/ng.$q)
+    return $http({
+      url : fromUrl,
+      async : options.isAsync || false,
+      dataType : options.dataType,
+      data : options.dataContent,
+      method : options.method || "GET"
+    }).success(function(data, status, headers, config) {
+    }).error(function(data, status, headers, config) {
+      throw ("Error with api call: " + fromUrl + ". Error status: " + status);
+    });
+  };
+
+  return {
+    doAPICall : _doAPICall
+  };
+} ]);
+
+
+angular.module("app.shared.system.api")
+// Web socket service
+.service("socketSrv", [ "$rootScope", function($rootScope) {
+  var connection = null;
+  var attempts = 1;
+  var msgCount = 0;
+  var callbacks = {};
+  var address = null;
+  var scope = $rootScope;
+
+  var _init = function(newAddress, newScope) {
+    address = newAddress;
+    if (newScope) {
+      scope = newScope;
+    }
+    _createWebSocket();
+  };
+
+  var _createWebSocket = function() {
+    if (!address) {
+      return false;
+    }
+    connection = new WebSocket(address);
+
+    connection.onopen = function() {
+      scope.$emit("websocket-status", {
+        "status" : "open",
+        "message" : "Websocket Open"
+      });
+      console.log("Opened websocket");
+      attempts = 1;
+
+      this.send('{ "type": "login", "account_type": "client", "token" : "' + $rootScope.account.token + '"}');
+
+    };
+
+    connection.onclose = function() {
+      scope.$emit("websocket-status", {
+        "status" : "error",
+        "message" : "Websocket closed"
+      }); // close
+      var time = _generateInterval(attempts);
+      setTimeout(function() {
+        attempts++;
+        _createWebSocket();
+      }, time);
+    };
+
+    connection.onerror = function(error) {
+      scope.$emit("websocket-status", {
+        "status" : "error",
+        "message" : "Websocket error"
+      });
+      console.log("Websocket error: " + error);
+    };
+
+    connection.onmessage = function(e) {
+      console.log("Websocket message: ", e.data);
+      var message = JSON.parse(e.data);
+      if ($.isPlainObject(message) && message.body) {
+        message.body.datetime = (new Date()).toString();
+        message.body.id = msgCount++;
+      }
+      _dispatchMessage(message);
+    };
+  };
+
+  var _sendMessage = function(message, callback, timeout) {
+    if ("tag" in message) {
+      if (message.tag in this.callbacks) {
+        console.log("Problem! Tag already exists in callbacks");
+      }
+      this.callbacks[message.tag] = {
+        timeout : timeout || 60,
+        callback : callback
+      };
+    }
+    connection.send(JSON.stringify(message));
+  };
+
+  var _dispatchMessage = function(message) {
+    switch (message.type) {
+    case "command_response":
+      if (message.command_tag in callbacks) {
+        callbacks[message.command_tag].callback(message);
+      } else {
+        console.log("No callback for tag <" + message.tag + "> in the callback queue");
+      }
+      break;
+    case "command":
+      break;
+    case "status_update":
+      scope.$emit("websocket-status_update", message.body);
+      break;
+    default:
+      console.log("Unknown message from websocket");
+    }
+  };
+
+  var _removeTag = function(tag) {
+    delete this.callbacks[tag];
+  };
+
+  var _generateInterval = function(k) {
+    var maxInterval = (Math.pow(2, k) - 1) * 1000;
+
+    if (maxInterval > 30 * 1000) {
+      maxInterval = 30 * 1000; // If the generated interval is more
+      // than 30 seconds, truncate it down to
+      // 30 seconds.
+    }
+    // generate the interval to a random number between 0 and the
+    // maxInterval determined from above
+    return Math.random() * maxInterval;
+  };
+
+  return {
+    init : _init,
+    createWebSocket : _createWebSocket,
+    sendMessage : _sendMessage,
+    generateInterval : _generateInterval,
+    dispatchMessage : _dispatchMessage,
+    removeTag : _removeTag
+
+  };
+
+} ]);
+
+angular.module("app.shared")
+.controller("TestingController", [ "$scope", function($scope) {
+} ])
+
+.controller("AboutController", [ "$scope", function($scope) {
+} ]);
+
+angular.module("app.shared.system")
+// TODO reassess. Provides service for accessing global variables.
+.service("globalVariablesSrv", [ "$timeout", function($timeout) {
+  var globalVariables = {
+    "currTimeVal" : new Date().getTime(),
+    "currTimeValUTC" : moment().utc().valueOf()
+
+  };
+
+  $timeout(function() {
+    globalVariables["currTimeVal"] = new Date().getTime();
+    globalVariables["currTimeValUTC"] = moment().utc().valueOf();
+  }, 1000);
+
+  return {
+    getVar : function(name) {
+      return globalVariables[name];
+    }
+
+  };
+
+} ])
+
+// Service that provides functions for checking the online status of the app
+.service("onlineUtils", [ "$window", "$rootScope", function($window, $rootScope) {
+
+  $rootScope.online = navigator.onLine;
+  $window.addEventListener("offline", function() {
+    $rootScope.$apply(function() {
+      $rootScope.online = false;
+    });
+  }, false);
+  $window.addEventListener("online", function() {
+    $rootScope.$apply(function() {
+      $rootScope.online = true;
+    });
+  }, false);
+
+  return {
+    isOnline : function() {
+      if ($rootScope.db.active) {
+        return $rootScope.online;
+      } else {
+        return false;
+      }
+    }
+  };
+} ])
+
+// Other general services
+.service("generalUtils", [ function() {
+  var fixDate = function(d, check) { // force d to be on check's YMD,
+    // for daylight savings purposes
+    if (+d) { // prevent infinite looping on invalid dates
+      while (d.getDate() !== check.getDate()) {
+        d.setTime(+d + (d < check ? 1 : -1) * 3600000);
+      }
+    }
+  };
+  return {
+    parseISO8601 : function(s, ignoreTimezone) { // ignoreTimezone
+      // defaults to false
+      // derived from http://delete.me.uk/2005/03/iso8601.html
+      // TODO: for a know glitch/feature, read
+      // tests/issue_206_parseDate_dst.html
+      var m = s.match(/^([0-9]{4})(-([0-9]{2})(-([0-9]{2})([T ]([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2})(:?([0-9]{2}))?))?)?)?)?$/);
+      if (!m) {
+        return null;
+      }
+      var date = new Date(m[1], 0, 1);
+      if (ignoreTimezone || !m[13]) {
+        var check = new Date(m[1], 0, 1, 9, 0);
+        if (m[3]) {
+          date.setMonth(m[3] - 1);
+          check.setMonth(m[3] - 1);
+        }
+        if (m[5]) {
+          date.setDate(m[5]);
+          check.setDate(m[5]);
+        }
+        fixDate(date, check);
+        if (m[7]) {
+          date.setHours(m[7]);
+        }
+        if (m[8]) {
+          date.setMinutes(m[8]);
+        }
+        if (m[10]) {
+          date.setSeconds(m[10]);
+        }
+        if (m[12]) {
+          date.setMilliseconds(Number("0." + m[12]) * 1000);
+        }
+        fixDate(date, check);
+      } else {
+        date.setUTCFullYear(m[1], m[3] ? m[3] - 1 : 0, m[5] || 1);
+        date.setUTCHours(m[7] || 0, m[8] || 0, m[10] || 0, m[12] ? Number("0." + m[12]) * 1000 : 0);
+        if (m[14]) {
+          var offset = Number(m[16]) * 60 + (m[18] ? Number(m[18]) : 0);
+          offset *= m[15] === '-' ? 1 : -1;
+          date = new Date(+date + (offset * 60 * 1000));
+        }
+      }
+      return date;
+    },
+    one_day : (24 * 60 * 60 * 1000),
+    one_hour : (60 * 60 * 1000)
+  };
+} ])
+
+.service("localStorageService", [ "onlineUtils", "$rootScope", function(onlineUtils, $rootScope) {
+  var appID = "WP-"; // String to go before every storage id.
+
+  var getStorageID = function(STORAGE_ID, ignoreAccount) {
+    var combinedID = appID + STORAGE_ID;
+    if (!ignoreAccount && $rootScope && $rootScope.account && $rootScope.account.name) {
+      combinedID = $rootScope.account.name + "_" + combinedID;
+    }
+    return combinedID;
+  };
+
+  this.getItem = function(STORAGE_ID, ignoreAccount) {
+    return localStorage.getItem(getStorageID(STORAGE_ID, ignoreAccount));
+  };
+  this.setItem = function(STORAGE_ID, data, ignoreAccount) {
+    return localStorage.setItem(getStorageID(STORAGE_ID, ignoreAccount), JSON.stringify(data));
+  };
+
+} ]);

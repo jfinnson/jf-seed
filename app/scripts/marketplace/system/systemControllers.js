@@ -2,7 +2,6 @@
  *  Controls and manages top level task app
  * 
  */
-
 angular.module("app.marketplace.system").controller("SystemController",
     [ "$scope", "$location","elementSrv", function($scope, $location, elementSrv) {
 
@@ -12,6 +11,7 @@ angular.module("app.marketplace.system").controller("SystemController",
       elementSrv.initService();
 //      accountService.init($scope);
       
+      //For demo TODO remove
       elementSrv.getEles('product').then(function(products){
         $scope.products = products;
       });
