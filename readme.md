@@ -1,6 +1,7 @@
 #jf-seed!
 
 - Seed for enterprise angular projects
+- Build using angular mobile seed and projects from Sowingo.
 
 # About
 
