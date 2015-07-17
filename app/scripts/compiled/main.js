@@ -688,9 +688,14 @@ angular
                 newEle.UI = trackUI;
 
                 // Update tracking map
-                _eleMaps[eleSrv.model_data.name][trackID] = newEle;
+                if(_eleMaps[eleSrv.model_data.name][trackID]){
+                  //Copy without loosing reference.
+                  angular.copy(newEle, _eleMaps[eleSrv.model_data.name][trackID]);
+                }else{
+                  _eleMaps[eleSrv.model_data.name][trackID] = newEle;
+                }
 
-                return newEle;
+                return _eleMaps[eleSrv.model_data.name][trackID];
               };
               var _createEles = function(eles, eleSrv) {
                 if (eles && eles.length && eleSrv) {
@@ -853,11 +858,10 @@ angular
                     currEleIns.b_data = $.extend(true, {}, eles[i]);
                     // Create ele while keeping untouched b-data
                     currEleIns = _create(eleSrv, currEleIns);
-
                     allEleInsMap[currEleIns.id] = currEleIns;
                   }
 
-                  return _createEles(allEleInsMap, eleSrv);
+                  return allEleInsMap;
                 });
               };
               var _getEles = function(eleType, options) {
@@ -908,7 +912,7 @@ angular
 
                     var currReEleIns = _updateInstance(currEleIns, newEleData);
 
-                    // update _eleMaps
+                    // update _eleMaps. Should be unnecessary with currReEleIns
                     _eleMaps[eleType][currReEleIns.id] = currReEleIns;
                   });
                 };
@@ -985,12 +989,14 @@ angular
                   };
                 }
               };
-
+              
+              //Update element object without loosing fields or references.
               _updateInstance = function(ele, newData) {
                 ele.b_data = $.extend(true, ele.b_data || {}, newData);
                 ele = $.extend(true, ele || {}, newData);
                 return ele;
               };
+              
               // Remove instance from global map. Also remove from backend if
               // apiRemove==true
               var _remove = function(eleType, currEle, apiRemove) {
