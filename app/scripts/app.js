@@ -1,19 +1,27 @@
-angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config([ "$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
+angular.module("app", [ 'ui.router', 'app.config', 'app.marketplace.templates', 'app.shared', 'app.marketplace' ]).config([ "$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
 
-  $routeProvider.when("/", {
+  $urlRouterProvider.when("", "/home");
+  $urlRouterProvider.when("/", "/home");
+
+  // For any unmatched url, send to /home
+  $urlRouterProvider.otherwise("/home");
+
+  $stateProvider.state("home", {
+    url: '/home',
     templateUrl : "templates/marketplace/main/mainPage.html",
-    controller : "SystemController",
-    page : "main"
-  }).when("/about", {
+    controller : "SystemController" 
+  }).state("about", {
+    url: '/about',
     templateUrl : "templates/shared/support/about.html",
-    controller : "AboutController",
-    page : "about"
-  }).when("/test", {
+    controller : "AboutController" 
+  }).state("test", {
+    url: '/test',
     templateUrl : "templates/shared/support/testing.html",
-    controller : 'TestingController',
-    page : "testing"
-  }).otherwise({
-    redirectTo : '/'
+    controller : 'TestingController' 
+  }).state("test.state1", {
+    url: '/state1',
+    templateUrl : "templates/shared/support/testing-state1.html"
+    //    controller : 'TestingController' 
   });
 
   // prevent reloading the same page
@@ -25,9 +33,9 @@ angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'a
     }
   });
 
-} ]).run([ '$route', "$rootScope", "$location", "$timeout", "$window", "$compile", "apiUrl", function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
+} ]).run(["$rootScope", "$location", "$timeout", "$window", "$compile", "apiUrl", function($rootScope, $location, $timeout, $window, $compile, apiUrl) {
 
-  $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
+//  $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
     // Possible place for access control
 
     // Only apply access restrictions if the next has an access role
@@ -50,44 +58,31 @@ angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'a
     //
     // }
     // }
-  });
+//  });
 
   // window.onbeforeunload = function(e) {
   // return 'Navigate away?';
   // }
 
   // Stop refresh on path change
-  var original = $location.path;
-  $location.path = function(path, reload) {
-    var lastRoute = $route.current;
-    var un = $rootScope.$on('$locationChangeSuccess', function(event) {
-      // These conditions and setting of currentRoute allows a watcher in the
-      // dashboard controller to update the UI on back/forward without reload.
-      // Without the lastRoute check avoid immediately reverting to
-      // lastRoute.
-      if ($route.current && $route.current.params && lastRoute !== $route.current) {
-        $rootScope.currentRoute = $route.current.params;
-      }
-
-      if (lastRoute && lastRoute.$$route.originalPath !== "") {
-        $route.current = lastRoute; // Check is necessary to not backtrack the
-        // first load when path is blank.
-      }
-      un();
-    });
-    return original.apply($location, [ path ]);
-  };
-
-  // Attach useful nested checking object to window.
-  window.checkNested = function(obj /* , level1, level2, ... levelN */) {
-    var args = Array.prototype.slice.call(arguments, 1);
-
-    for (var i = 0; i < args.length; i++) {
-      if (!obj || !obj.hasOwnProperty(args[i])) {
-        return false;
-      }
-      obj = obj[args[i]];
-    }
-    return true;
-  };
+//  var original = $location.path;
+//  $location.path = function(path, reload) {
+//    var lastRoute = $route.current;
+//    var un = $rootScope.$on('$locationChangeSuccess', function(event) {
+//      // These conditions and setting of currentRoute allows a watcher in the
+//      // dashboard controller to update the UI on back/forward without reload.
+//      // Without the lastRoute check avoid immediately reverting to
+//      // lastRoute.
+//      if ($route.current && $route.current.params && lastRoute !== $route.current) {
+//        $rootScope.currentRoute = $route.current.params;
+//      }
+//
+//      if (lastRoute && lastRoute.$$route.originalPath !== "") {
+//        $route.current = lastRoute; // Check is necessary to not backtrack the
+//        // first load when path is blank.
+//      }
+//      un();
+//    });
+//    return original.apply($location, [ path ]);
+//  };
 } ]);

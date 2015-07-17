@@ -22,7 +22,8 @@ Install node and bower packages
 
 	sudo npm install && sudo bower install --dev
 
-Run the server with `grunt server` and open the application [here](http://localhost:9000/app/index.html) (`localhost:9000/app/index.html`).
+Run the dist server with `grunt server` and open the application [here](http://localhost:8003/app/index.html) (`localhost:8003`).
+Run the dev server with `grunt serve` and open the application [here](http://localhost:8002/app/index.html) (`localhost:8002`).
 
 # Testing
 

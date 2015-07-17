@@ -4,6 +4,8 @@ angular
      * Service for accessing, maintaining, and updating element types and
      * instances.
      * 
+     * TODO assess if/can this service be moved to shared
+     * 
      */
     .service(
         "elementSrv",
@@ -435,12 +437,12 @@ angular
                 _initRootMethods();
                 _initListeners();
               };
+              _initService();
 
               /*
                * Public methods
                */
               return {
-                initService : _initService, //Inits service and element models
 
                 create : _create,
                 remove : _remove,

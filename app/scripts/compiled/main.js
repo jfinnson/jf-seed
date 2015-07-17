@@ -1,19 +1,27 @@
-angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'app.shared', 'app.marketplace' ]).config([ "$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
+angular.module("app", [ 'ui.router', 'app.config', 'app.marketplace.templates', 'app.shared', 'app.marketplace' ]).config([ "$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
 
-  $routeProvider.when("/", {
+  $urlRouterProvider.when("", "/home");
+  $urlRouterProvider.when("/", "/home");
+
+  // For any unmatched url, send to /home
+  $urlRouterProvider.otherwise("/home");
+
+  $stateProvider.state("home", {
+    url: '/home',
     templateUrl : "templates/marketplace/main/mainPage.html",
-    controller : "SystemController",
-    page : "main"
-  }).when("/about", {
+    controller : "SystemController" 
+  }).state("about", {
+    url: '/about',
     templateUrl : "templates/shared/support/about.html",
-    controller : "AboutController",
-    page : "about"
-  }).when("/test", {
+    controller : "AboutController" 
+  }).state("test", {
+    url: '/test',
     templateUrl : "templates/shared/support/testing.html",
-    controller : 'TestingController',
-    page : "testing"
-  }).otherwise({
-    redirectTo : '/'
+    controller : 'TestingController' 
+  }).state("test.state1", {
+    url: '/state1',
+    templateUrl : "templates/shared/support/testing-state1.html"
+    //    controller : 'TestingController' 
   });
 
   // prevent reloading the same page
@@ -25,9 +33,9 @@ angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'a
     }
   });
 
-} ]).run([ '$route', "$rootScope", "$location", "$timeout", "$window", "$compile", "apiUrl", function($route, $rootScope, $location, $timeout, $window, $compile, apiUrl) {
+} ]).run(["$rootScope", "$location", "$timeout", "$window", "$compile", "apiUrl", function($rootScope, $location, $timeout, $window, $compile, apiUrl) {
 
-  $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
+//  $rootScope.$on("$routeChangeSuccess", function(event, next, current) {
     // Possible place for access control
 
     // Only apply access restrictions if the next has an access role
@@ -50,46 +58,33 @@ angular.module("app", [ 'app.config', 'app.marketplace.templates', 'ngRoute', 'a
     //
     // }
     // }
-  });
+//  });
 
   // window.onbeforeunload = function(e) {
   // return 'Navigate away?';
   // }
 
   // Stop refresh on path change
-  var original = $location.path;
-  $location.path = function(path, reload) {
-    var lastRoute = $route.current;
-    var un = $rootScope.$on('$locationChangeSuccess', function(event) {
-      // These conditions and setting of currentRoute allows a watcher in the
-      // dashboard controller to update the UI on back/forward without reload.
-      // Without the lastRoute check avoid immediately reverting to
-      // lastRoute.
-      if ($route.current && $route.current.params && lastRoute !== $route.current) {
-        $rootScope.currentRoute = $route.current.params;
-      }
-
-      if (lastRoute && lastRoute.$$route.originalPath !== "") {
-        $route.current = lastRoute; // Check is necessary to not backtrack the
-        // first load when path is blank.
-      }
-      un();
-    });
-    return original.apply($location, [ path ]);
-  };
-
-  // Attach useful nested checking object to window.
-  window.checkNested = function(obj /* , level1, level2, ... levelN */) {
-    var args = Array.prototype.slice.call(arguments, 1);
-
-    for (var i = 0; i < args.length; i++) {
-      if (!obj || !obj.hasOwnProperty(args[i])) {
-        return false;
-      }
-      obj = obj[args[i]];
-    }
-    return true;
-  };
+//  var original = $location.path;
+//  $location.path = function(path, reload) {
+//    var lastRoute = $route.current;
+//    var un = $rootScope.$on('$locationChangeSuccess', function(event) {
+//      // These conditions and setting of currentRoute allows a watcher in the
+//      // dashboard controller to update the UI on back/forward without reload.
+//      // Without the lastRoute check avoid immediately reverting to
+//      // lastRoute.
+//      if ($route.current && $route.current.params && lastRoute !== $route.current) {
+//        $rootScope.currentRoute = $route.current.params;
+//      }
+//
+//      if (lastRoute && lastRoute.$$route.originalPath !== "") {
+//        $route.current = lastRoute; // Check is necessary to not backtrack the
+//        // first load when path is blank.
+//      }
+//      un();
+//    });
+//    return original.apply($location, [ path ]);
+//  };
 } ]);
 
 angular.module('app.config', [])
@@ -616,6 +611,8 @@ angular
      * Service for accessing, maintaining, and updating element types and
      * instances.
      * 
+     * TODO assess if/can this service be moved to shared
+     * 
      */
     .service(
         "elementSrv",
@@ -1047,12 +1044,12 @@ angular
                 _initRootMethods();
                 _initListeners();
               };
+              _initService();
 
               /*
                * Public methods
                */
               return {
-                initService : _initService, //Inits service and element models
 
                 create : _create,
                 remove : _remove,
@@ -1167,7 +1164,6 @@ angular.module("app.marketplace.system").controller("SystemController",
       //							socketSrv.init((window.location.protocol == "https:" ? 'wss:' : 'ws:') + '//' + window.location.host);
 
       //init services here
-      elementSrv.initService();
 //      accountService.init($scope);
       
       //For demo TODO remove
@@ -1251,7 +1247,7 @@ angular.module("app.shared.support")
 
     } ]);
 //Shared general purpose directives
-angular.module("app.shared")
+angular.module("app.shared.support")
 .directive('ngRightClick',["$parse",  function($parse) {
     return function(scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);
@@ -1298,6 +1294,23 @@ angular.module("app.shared")
 
 ;
 
+//Provides general services. Also includes some non-angular service funcitons.
+angular.module("app.shared.support")
+.run(function(){
+  // Attach useful nested checking object to window.
+  // Fn can be used instead of an ugly nested checking if. if(obj && obj.test1 && obj.test1.test2 ...)
+  window.checkNested = function(obj /* , level1, level2, ... levelN */) {
+    var args = Array.prototype.slice.call(arguments, 1);
+
+    for (var i = 0; i < args.length; i++) {
+      if (!obj || !obj.hasOwnProperty(args[i])) {
+        return false;
+      }
+      obj = obj[args[i]];
+    }
+    return true;
+  };
+});
 // Web server api service. Single point for api calls.
 angular.module("app.shared.system.api").service("serverAPI", [ "$http", function($http) {
 

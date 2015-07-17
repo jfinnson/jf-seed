@@ -8,7 +8,6 @@ angular.module("app.marketplace.system").controller("SystemController",
       //							socketSrv.init((window.location.protocol == "https:" ? 'wss:' : 'ws:') + '//' + window.location.host);
 
       //init services here
-      elementSrv.initService();
 //      accountService.init($scope);
       
       //For demo TODO remove

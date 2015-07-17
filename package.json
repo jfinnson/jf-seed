@@ -31,7 +31,8 @@
 	    "grunt-ng-annotate": "~0.7.0",
 	    "grunt-cdnify": "~0.1.1",
 	    "grunt-contrib-imagemin": "~0.9.2",
-    	"grunt-ng-constant": "~1.0.0"
+    	"grunt-ng-constant": "~1.0.0",
+    	"angular-ui-router": "~0.2.15"
     },
     "engines": {
         "node": ">=0.8.0"

@@ -1,5 +1,5 @@
 //Shared general purpose directives
-angular.module("app.shared")
+angular.module("app.shared.support")
 .directive('ngRightClick',["$parse",  function($parse) {
     return function(scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);

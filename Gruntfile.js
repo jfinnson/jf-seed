@@ -78,7 +78,7 @@ module.exports = function(grunt) {
         files : [ {
           // Marketplace JS Libs
           dest : '<%= dirs.app.root %>/scripts/compiled/libraries.js',
-          src : ['<%= dirs.jslib.bower %>/angular-route/angular-route.js', '<%= dirs.jslib.bower %>/angular-ui-grid/ui-grid.js',
+          src : ['<%= dirs.jslib.bower %>/angular-ui-router/release/angular-ui-router.js', '<%= dirs.jslib.bower %>/angular-ui-grid/ui-grid.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap/ui-bootstrap-tpls.min.js', '<%= dirs.jslib.bower %>/angular-ui-utils/ui-utils.min.js',
               '<%= dirs.jslib.bower %>/angular-bootstrap-show-errors/src/showErrors.min.js', '<%= dirs.jslib.bower %>/underscore/underscore.js',
               '<%= dirs.jslib.root %>/toaster/toaster.js']
