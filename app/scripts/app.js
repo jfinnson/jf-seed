@@ -15,7 +15,7 @@ angular.module("app", ['app.config', 'app.marketplace.templates', 'ngRoute', 'ap
             page : "about"
           }).when("/test", {
             templateUrl : "templates/shared/support/testing.html",
-            controller : 'TestingController',
+            controller : 'TestingController',  
             page : "testing"   
           }).otherwise({
             redirectTo : '/'

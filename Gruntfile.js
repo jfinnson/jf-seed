@@ -241,6 +241,11 @@ module.exports = function(grunt) {
         dest : "app/index.html"
       },
       dist : {
+        options : {
+          context : {
+            DEV : false
+          }
+        },
         src : "app/indexTemplate.html",
         dest : "app/index.html"
       }
@@ -270,11 +275,15 @@ module.exports = function(grunt) {
         dirs : [ "dist" ]
       }
     },
+    //Does not build dist automatically atm. Faster this way.
     watch : {
       server : {
+        options: {
+          livereload: true,
+        },
         files : [ "app/indexTemplate.html", "app/templates/**/*.html", "app/pages/**/*.html", "app/scripts/**/*.js", "app/styles/**/*.less",
             "app/styles/**/*.{png,jpg,jpeg}" ],
-        tasks : [ "concat", "less", "html2js:templates", "preprocess:dev", "jshint", "livereload" ]
+        tasks : [ "concat", "less", "html2js:templates", "preprocess:dev", "jshint" ]
       }
     }
   });
@@ -327,10 +336,8 @@ module.exports = function(grunt) {
 
     grunt.task.run(tasks);
   });
-  grunt.registerTask("serve", ["livereload-start", "connect:dev" ]);
-  grunt.registerTask("testtask", ["preprocess:dist", "less", "html2js:templates", "jshint", 
-                                  "ngconstant", "useminPrepare", "imagemin", "cssmin", "htmlmin",
-                                  "concat", "concat:dev_lib", "concat:dev_app", 'ngAnnotate', "copy", "uglify:dist", "usemin" ]);
+  grunt.registerTask("serve", ["connect:dev" ]);
+  grunt.registerTask("testtask", ['watch', "connect:dev"]);
 
   grunt.registerTask("build", [ "clean:dist", 
                                 "preprocess:dist", "less", "html2js:templates", "jshint", 

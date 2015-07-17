@@ -15,7 +15,7 @@ angular.module("app", ['app.config', 'app.marketplace.templates', 'ngRoute', 'ap
             page : "about"
           }).when("/test", {
             templateUrl : "templates/shared/support/testing.html",
-            controller : 'TestingController',
+            controller : 'TestingController',  
             page : "testing"   
           }).otherwise({
             redirectTo : '/'
@@ -1090,9 +1090,6 @@ angular.module("app")
     "api" : {
       //Different path types which correspond to different endpoints.
       "multiple" : function(options){
-        if(!checkNested(options)){
-          throw "Missing option(s) for account path 'single'. Options: " + options;
-        }
         return "/products";
       },
       "single" : function(options){

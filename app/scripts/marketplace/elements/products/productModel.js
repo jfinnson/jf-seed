@@ -8,9 +8,6 @@ angular.module("app")
     "api" : {
       //Different path types which correspond to different endpoints.
       "multiple" : function(options){
-        if(!checkNested(options)){
-          throw "Missing option(s) for account path 'single'. Options: " + options;
-        }
         return "/products";
       },
       "single" : function(options){
